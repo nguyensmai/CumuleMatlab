@@ -10,10 +10,9 @@ inPredi  = [];
 inputsSet = 1:(dimO+dimM) ;
 
 for iPred = 1:nPred
-    if ~isempty(pred(iPred).meanError) && ...
-            pred(iPred).meanError<THRES_GOOD_PRED && ...
+    if ~isempty(pred(iPred).meanError) && ... % pred(iPred).meanError<THRES_GOOD_PRED && ...
             ~isempty(pred(iPred).quality)
-        prob(iPred) = pred(iPred).quality;
+        prob(iPred) = min(1,pred(iPred).quality);
         %prob(iPred) = 1/pred(iPred).meanError;
     end
 end
@@ -21,7 +20,9 @@ prob = prob/sum(prob);
 
 repPred       = find(rand<cumsum(prob),1,'first');
 
-if ~isempty(repPred)
+if isempty(repPred)
+  repPred = randi(nPred,1);  
+end
     disp('duplicate')
     pred(repPred)
     inputMask     = randsample(inputsSet,pred(repPred).sizeInp-1);
@@ -34,7 +35,6 @@ if ~isempty(repPred)
     pred(nPred+1).w1      = pred(repPred).w1;
     pred(nPred+1).w2      = pred(repPred).w2;
     pred(nPred+1).method  = ['duplicate from ', num2str(pred(repPred).maskInp), ' to ', num2str(pred(repPred).maskOut)];
-    
-end
+
 
 end

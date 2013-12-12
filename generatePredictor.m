@@ -10,7 +10,7 @@ while ~uniqueBool
     inputsSetDim  = numel(inputsSet);
     inputSize =-1;
     while inputSize<1 || inputSize>inputsSetDim
-        inputSize = round(inputsSetDim/2*randn(1));
+        inputSize = round(inputsSetDim/3*randn(1));
     end
     %inputSize     = randi(inputsSetDim);
     inputMask     = randsample(inputsSet,inputSize);

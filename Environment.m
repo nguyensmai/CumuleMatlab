@@ -37,8 +37,8 @@ classdef Environment < handle
             outputState(2) = min(1, max(cos(state(2)+action(2)),-1));
             outputState(3) = min(1, max(cos((state(1)+action(1))^2+(state(2)+action(2))^2),-1));
             obj.hiddenState = obj.hiddenState+1;
-            outputState(4) =  min(1, max(cos(state(1)+state(2)),-1)); ;%sin(obj.hiddenState);
-            outputState(5) =  min(1, max(cos(action(1)+action(2)),-1)); ;%sin(obj.hiddenState);
+            outputState(4) =  min(1, max(cos(state(1)+state(2)),-1)); %sin(obj.hiddenState);
+            outputState(5) =  min(1, max(cos(action(1)+action(2)),-1)); %sin(obj.hiddenState);
             
             outputState(6) =  min(1, max(state(4)^2+ state(5)^2,-1)); 
             outputState(7) =  min(1, max(state(1)^2 + state(2)^2 ,-1)); 

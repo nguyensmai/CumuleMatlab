@@ -65,7 +65,7 @@ while true
     time = time + 1;
     st  = stp1;
     % 21: endwhile
-    save test_learning
+    save(['test_learning',num2str(floor(time/2000))])
 end
 
 %% plot results

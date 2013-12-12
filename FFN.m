@@ -21,13 +21,14 @@ classdef FFN
         maskOut
         idFixed
         method
+        
     end
     
     
     methods
         function obj = FFN(inputMask, outputMask,hiddenSize1, hiddenSize2)
             %%%%%%%%%%%%%%%%%%% Initial setting up of the variables
-            obj.eta = 0.005;        % Learning rate. Note: eta = 1 is very large.
+            obj.eta = 0.01;        % Learning rate. Note: eta = 1 is very large.
             obj.alpha = 0.95;    % Momentum term
             % Add a column of 1's to patterns to make a bias node
             obj.sizeInp  = numel(inputMask)+1;
