@@ -12,15 +12,16 @@ function pred = initialisePredictors(nPred, inputsSet, env)
 % 
 % pred(1)         = FFN(inputMask, outputMask, 10,10);
 
- pred(1) = FFN([1 9], [1],5, 5);  % good for env4 [s1 m1] -> s1
+ pred(1) = FFN([1 9], [1],5, 5, inputsSet);  % good for env4 [s1 m1] -> s1
 % 
 %randomly generated
+probInput = ones(size(inputsSet));
 for iPred=2:nPred
-    [pred(iPred), inPredi, outPredi] = generatePredictor(inputsSet, pred, env.dimO, iPred);
+    [pred(iPred), inPredi, outPredi] = generatePredictor(inputsSet, pred, env.dimO, iPred, probInput);
 end
  
-pred(1) = FFN([1 9], [1], 5, 5);  % good for env4 [s1 m1] -> s1
-pred(7) = FFN([1 2], [7], 20, 20);  % good for env4 
+pred(1) = FFN([1 9], [1], 5, 5,inputsSet);  % good for env4 [s1 m1] -> s1
+pred(7) = FFN([1 2], [7], 20, 20, inputsSet);  % good for env4 
 
 % % pre-coded
 % iPred = 1;

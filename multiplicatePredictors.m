@@ -1,4 +1,4 @@
-function [pred, nPred] = multiplicatePredictors(inputsSet, pred,dimO, dimM, outMask)
+function [pred, nPred] = multiplicatePredictors(inputsSet, pred,dimO, dimM, outMask, probInput)
 nPred = numel(pred);
 p1Thres= 0.3;
 p2Thres= 0.7;
@@ -11,12 +11,12 @@ p2Thres= 0.7;
 
 p1 = rand(1);
 if p1<p1Thres
-    [pred(nPred+1), inPredi, outPredi] = generatePredictor(inputsSet, pred,dimO, outMask);
+    [pred(nPred+1), inPredi, outPredi] = generatePredictor(inputsSet, pred,dimO, outMask, probInput);
 
 
 %duplicate existing predictors : to be implemented (TODO)
 elseif p1<p2Thres+p1Thres
-[pred, inPredi, outPredi] = duplicatePredictor(inputsSet, pred,dimO,dimM, outMask);
+[pred, inPredi, outPredi] = duplicatePredictor(inputsSet, pred,dimO,dimM, outMask, probInput);
 end
 
 

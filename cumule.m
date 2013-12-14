@@ -23,7 +23,7 @@ sMemory = zeros(MEMORY_SIZE, dimO+dimM+1);
 save test_initialisation
 time = 1;
 
-% 9: while true do
+%% 9: while true do
 while true
     %% 8: LEARNING:
     

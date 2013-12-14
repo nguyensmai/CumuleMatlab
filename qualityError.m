@@ -16,7 +16,7 @@ thres = 0.005;
 if error<=thres
     quality = 1/(error*1./thres); %(10*progress)^0.5 +1;
 else
-    quality = 1 - (error-thres);
+    quality = 1 - 3*(error-thres)^2;
     %quality = 0.3/((200*error)^0.3)+0.7;
 end
 quality = max(quality,0);
