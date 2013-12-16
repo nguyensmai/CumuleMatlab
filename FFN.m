@@ -28,7 +28,7 @@ classdef FFN
     methods
         function obj = FFN(inputMask, outputMask,hiddenSize1, hiddenSize2, inputsSet)
             %%%%%%%%%%%%%%%%%%% Initial setting up of the variables
-            obj.eta = 0.01;        % Learning rate. Note: eta = 1 is very large.
+            obj.eta = 0.1;        % Learning rate. Note: eta = 1 is very large.
             obj.alpha = 0.95;    % Momentum term
             % Add a column of 1's to patterns to make a bias node
             obj.sizeInp  = numel(inputMask)+1;
@@ -100,57 +100,42 @@ classdef FFN
         end
         
         
-        function [deprecated  obj] = deprecateBadPredictor( obj, memory, time, timeWindow)
+        function [deprecated,  obj] = deprecateBadPredictor( obj, memory, time, timeWindow)
+            global tdLearner
             deprecated = false;
             if time>timeWindow+1 && numel(obj.sseRec)>timeWindow+1
-                obj.meanError  = mean(obj.sseRec(end-timeWindow:end));
-                qualityPredictor2 = qualityError(obj.meanError) ;
+                %obj.meanError  = mean(obj.sseRec(end-timeWindow:end));
                 
                 current_error = zeros(timeWindow-1,1);
-                for i=1:timeWindow-1
+                parfor i=1:timeWindow-1
                     data_in          = memory(i,[obj.maskInp end]);
                     desired_out      = memory(i+1,[obj.maskOut]);
                     current_error(i) = errorInPrediction(obj,data_in, desired_out);
                 end
-                obj.progress       = obj.meanError - mean(current_error);
-                qualityPredictor1     = qualityProgress(obj.progress);
-                obj.quality   = (qualityPredictor1*qualityPredictor2)^((numel(obj.sseRec)*1./(20*timeWindow))^2);
-                %obj.quality   = exp((qualityPredictor1*qualityPredictor2-1)^(timeWindow^2/numel(obj.sseRec)));
-                qualityPredictor      = min(1,obj.quality);
-                %qualityPredictor      = min(1,exp((qualityPredictor1*qualityPredictor2-1)^3*timeWindow));
-                r = rand()*0.995;
-                
-                if (r>qualityPredictor) && (obj.idFixed == -1)
-                    disp(['deprecate predictor  from ', num2str(obj.maskInp), ' to ', num2str(obj.maskOut),...
-                        ' error is ', num2str(obj.meanError), ...
-                        ' progress is ', num2str(obj.progress),...
-                        ' quality is ', num2str(qualityPredictor2), ' ',num2str(qualityPredictor1), ' ',num2str(obj.quality), ...
-                        ' at time ', num2str(numel(obj.sseRec))     ]);
-                    if obj.maskOut == 1 || obj.maskOut == 7
-                        disp('DEPRECATEBADPREDICTORS why?')
-                    end
-                    deprecated = true;
-                    delta = zeros(1,obj.sizeInp-1);
-                    for inp = 1:obj.sizeInp-1
-                        delta(inp) = sum(abs(obj.w1(inp,:)));
-                    end
-                    delta= delta/sum(delta);
-                    obj.probInput(obj.maskInp) = max( 0.1,  obj.probInput(obj.maskInp)-0.1*delta); 
-                    %                     pred =  pred([1:iPred-1 iPred+1:end]);
-                    %                     [pred nPred] = multiplicatePredictors(inputsSet, pred,dimO,dimM, maskOut);
-                else
-                    %             disp(['good predictor  from ', num2str(obj.maskInp), ' to ', num2str(obj.maskOut),...
-                    %                 ' error is ', num2str(obj.meanError), ...
-                    %                 ' progress is ', num2str(obj.progress), ...
-                    %                 ' quality is ', num2str(qualityPredictor2), ' ',num2str(qualityPredictor1), ' ',num2str(obj.quality), ...
-                    %                 ' at time ', num2str(numel(obj.sseRec))     ]);
-                    deprecated = false;
+                progressL      = obj.sseRec(end-timeWindow+1) - current_error;
+                rew = obj.sseRec(end);
+                nbBins = floor(tdLearner.tileC.dimension/2);
+                dt = floor((timeWindow-2)/nbBins);
+                parfor i=1:nbBins
+                    st(i) = mean(obj.sseRec(end-1-nbBins*dt+(i-1)*dt : end-1-nbBins*dt+i*dt));
                 end
+                parfor i=1:nbBins
+                    st(nbBins+i) = mean(progressL(end-1-nbBins*dt+(i-1)*dt : end-1-nbBins*dt+(i)*dt));
+                end
+                
+                parfor i=1:nbBins
+                    stp1(i) = mean(obj.sseRec(end-nbBins*dt+(i-1)*dt : end-nbBins*dt+i*dt));
+                end
+                parfor i=1:nbBins
+                    stp1(nbBins+i) = mean(progressL(end-nbBins*dt+(i-1)*dt : end-nbBins*dt+i*dt));
+                end
+                
+                 delta = tdUpdate(tdLearner, st, stp1, rew);
                 
             end
         end %end function deprecateBadPredictors
         
-        end %end methods
-        
-        
-    end
+    end %end methods
+    
+    
+end

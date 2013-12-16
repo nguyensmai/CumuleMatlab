@@ -3,9 +3,8 @@ function [pred nPred] = deprecateBadPredictors(pred, memory, time, inputsSet,dim
 
 
 %intialisation
+global tdLearner
 nPred = numel(pred);
-progress  = zeros(1,nPred);
-meanError = zeros(1,nPred);
 iPred = 1;
 
 if numel(pred)>=1

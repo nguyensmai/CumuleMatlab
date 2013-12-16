@@ -20,12 +20,22 @@ mt   = env.randomAction;
 st   = 2*rand(1,dimO)-1;
 % 7: initialise short-term memory
 sMemory = zeros(MEMORY_SIZE, dimO+dimM+1);
-save test_initialisation
+save test_initialisation_gamma1
 time = 1;
+
+%td learning for the errors\
+global tdLearner
+dimTD     = 10;
+nbLayers  = 2;
+nbTiles   = 5;
+tileMin   = [zeros(1,5)   , -0.1*ones(1,5)];
+tileMax   = [0.3*ones(1,5), 0.2*ones(1,5)];
+tileC     = TileCoding(dimTD, nbTiles*ones(1,dimTD),tileMin,tileMax,nbLayers);
+tdLearner = TdLearning(nbTiles^dimTD*nbLayers, 0.1, tileC);
 
 %% 9: while true do
 while true
-    %% 8: LEARNING:
+    %8: LEARNING:
     
     %     10:	for iPred from 1 to nPred do
     %     11:	Compute inDataiPred from sm
@@ -39,7 +49,7 @@ while true
     %     14:	Execute a motor command m chosen randomly
     mt   = env.randomAction;
     smt = ([st  mt 1]+1)/2;
-    sMemory(mod(time,MEMORY_SIZE)+1,:)=smt;
+    sMemory = [sMemory(2:end,:); smt];
 
     %     15:	s(t + 1) ? read from sensorimotor data the new state.
     stp1  = executeAction(env, st, mt);
@@ -65,7 +75,7 @@ while true
     time = time + 1;
     st  = stp1;
     % 21: endwhile
-    save(['test_learning',num2str(floor(time/2000))])
+    save(['test_learning_gamma1_',num2str(floor(time/2000))])
 end
 
 %% plot results
