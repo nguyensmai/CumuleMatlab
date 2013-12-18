@@ -13,7 +13,7 @@ nbFixed = 0;
 env = Environment(dimO,dimM);
 inputsSet = 1:(dimO+dimM) ;
 % 4: InitialisenPredpredictors(hand-coded).
-pred = initialisePredictors(nPred,inputsSet, env);
+%pred = initialisePredictors(nPred,inputsSet, env);
 % 5: m?randommotorcommand
 mt   = env.randomAction;
 % 6:	s(t )	?	initial	state.
@@ -31,11 +31,16 @@ nbTiles   = 5;
 tileMin   = [zeros(1,5)   , -0.1*ones(1,5)];
 tileMax   = [0.3*ones(1,5), 0.2*ones(1,5)];
 tileC     = TileCoding(dimTD, nbTiles*ones(1,dimTD),tileMin,tileMax,nbLayers);
-tdLearner = TdLearning(nbTiles^dimTD*nbLayers, 0.1, tileC);
+tdLearner = TdLearning(nbTiles^dimTD*nbLayers, 0.1, 1, tileC);
 
 %% 9: while true do
+
+
 while true
-    %8: LEARNING:
+pred = initialisePredictors(nPred,inputsSet, env);
+
+for j=1:5000
+%8: LEARNING:
     
     %     10:	for iPred from 1 to nPred do
     %     11:	Compute inDataiPred from sm
@@ -75,7 +80,10 @@ while true
     time = time + 1;
     st  = stp1;
     % 21: endwhile
+    if mod(time,1000)
     save(['test_learning_gamma1_',num2str(floor(time/2000))])
+    end
+end
 end
 
 %% plot results
