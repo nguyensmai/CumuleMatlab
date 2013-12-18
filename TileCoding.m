@@ -23,7 +23,7 @@ classdef TileCoding
             sd = zeros(obj.nbLayers,1);
             dx_perLayer = (obj.xMax-obj.xMin)./(obj.nbLayers*(obj.nbTiles-1));
             for iLayer = 1: obj.nbLayers
-                sdVec  = ( (1.0*sc-(obj.xMin+(iLayer-1)*dx_perLayer)).* (obj.nbTiles-1) )./( obj.xMax-obj.xMin ) ;
+                sdVec  = ( (1.0*sc-(obj.xMin-(iLayer-1)*dx_perLayer)).* (obj.nbTiles-1) )./( obj.xMax-obj.xMin ) ;
                 sdVec  = max(1,1+floor(sdVec));
                 sdVec = min(obj.nbTiles, sdVec );
                 sd(iLayer) = sdVec(1);
