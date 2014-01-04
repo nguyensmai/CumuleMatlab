@@ -13,7 +13,10 @@ while ~uniqueBool
         inputSize = round(inputsSetDim/3*randn(1));
     end
     %inputSize     = randi(inputsSetDim);
-    inputMask     = randsample(inputsSet,inputSize, true, probInput);
+    inputMask =[];
+    while (isempty(inputMask) || (size(unique(inputMask),2)~=inputSize) ) 
+        inputMask     = randsample(inputsSet,inputSize, true, probInput);
+    end
     inputMask     = sort(inputMask);
     
     %     outputSize =-1;
@@ -40,13 +43,14 @@ end
 
 hiddenSize1 =-1;
 while hiddenSize1<1 || hiddenSize1>HIDDEN_MAX
-    hiddenSize1 = round(HIDDEN_MAX*randn(1));
+    hiddenSize1 = max(2,round(HIDDEN_MAX*randn(1)));
 end
 hiddenSize2 =-1;
 while hiddenSize2<1 || hiddenSize2>HIDDEN_MAX
-    hiddenSize2 = round(HIDDEN_MAX*randn(1));
+    hiddenSize2 = max(2,round(HIDDEN_MAX*randn(1)));
 end
 
 predi         = FFN(inputMask, outputMask, hiddenSize1, hiddenSize2, inputsSet);
+predi.probInput = probInput;
 predi.method  = ['generated'];
 end

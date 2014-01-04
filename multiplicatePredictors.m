@@ -12,11 +12,10 @@ p2Thres= 0.7;
 p1 = rand(1);
 if p1<p1Thres
     [pred(nPred+1), inPredi, outPredi] = generatePredictor(inputsSet, pred,dimO, outMask, probInput);
-
-
-%duplicate existing predictors : to be implemented (TODO)
+    
+    %duplicate existing predictors : to be implemented (TODO)
 elseif p1<p2Thres+p1Thres
-[pred, inPredi, outPredi] = duplicatePredictor(inputsSet, pred,dimO,dimM, outMask, probInput);
+    [pred, inPredi, outPredi] = duplicatePredictor(inputsSet, pred,dimO,dimM, outMask, probInput);
 end
 
 

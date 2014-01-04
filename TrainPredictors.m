@@ -5,18 +5,22 @@ error  = -ones(1,nPred);
 outPred = cell(1,nPred);
 
 for iPred = 1:nPred
-    data_in   = smt([pred(iPred).maskInp end]);
-    desired_out        = stp1([pred(iPred).maskOut]);
+    data_in{iPred}            = smt([pred(iPred).maskInp end]);
+    desired_out{iPred}        = stp1([pred(iPred).maskOut]);
+end
+
+parfor iPred = 1:nPred
+    
     [sse pred_out pred(iPred)] = ...
-        bkprop(pred(iPred), data_in, desired_out);
+        bkprop(pred(iPred), data_in{iPred}, desired_out{iPred});
     error(iPred)   = sse;
-%     outPred{iPred} =  2*pred_out-1;
-%      [sse pred_out pred(iPred)] = ...
-%         bkprop(pred(iPred), data_in, desired_out);
-%      [sse pred_out pred(iPred)] = ...
-%         bkprop(pred(iPred), data_in, desired_out);
-%      [sse pred_out pred(iPred)] = ...
-%         bkprop(pred(iPred), data_in, desired_out);
+    %     outPred{iPred} =  2*pred_out-1;
+    %      [sse pred_out pred(iPred)] = ...
+    %         bkprop(pred(iPred), data_in, desired_out);
+    %      [sse pred_out pred(iPred)] = ...
+    %         bkprop(pred(iPred), data_in, desired_out);
+    %      [sse pred_out pred(iPred)] = ...
+    %         bkprop(pred(iPred), data_in, desired_out);
 end
 
 %     pattern2 = smt(1,[1 3 5]);
