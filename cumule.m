@@ -35,13 +35,13 @@ nbTiles   = 7;
 tileMin   = [-ones(1,5)   , -ones(1,5)];
 tileMax   = [11*ones(1,5), 7*ones(1,5)];
 tileC     = TileCoding(dimTD, nbTiles*ones(1,dimTD),tileMin,tileMax,nbLayers);
-%%
-tdLearner = TdLearning(nbTiles^dimTD*nbLayers, 0.1, 0.9, tileC);
-%%
+load tdLearner % to load the fitness function 
+% to create a new fitness function
+%tdLearner = TdLearning(nbTiles^dimTD*nbLayers, 0.1, 1, tileC); 
+matlabpool('open',nPred);
+
 pred = initialisePredictors(nPred,inputsSet, env);
-
 %% 9: while true do
-
 
 while true
     
@@ -91,6 +91,7 @@ while true
     if mod(time,200000)==0
     save(['test_learning_',num2str(floor(time/200000))])
     end
+
 end
 
 %% plot results

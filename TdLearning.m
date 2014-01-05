@@ -12,7 +12,7 @@ classdef TdLearning <handle
        
        function obj = TdLearning(nStates, learn_rate, discount_factor, tileC)
            obj.dimS      = nStates;
-           obj.Vtd       = zeros(1,nStates); 
+           obj.Vtd       = zeros(1,nStates);
            obj.alpha     = learn_rate;
            obj.gamma     = discount_factor;
            obj.tileC     = tileC;

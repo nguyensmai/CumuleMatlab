@@ -9,7 +9,7 @@ iPred = 1;
 
 if numel(pred)>=1
     iPred = mod(time,numel(pred))+1;
-    %while iPred <=numel(pred)
+    while iPred <=numel(pred)
     [deprecated pred(iPred)] = deprecateBadPredictor( pred(iPred), memory, time, timeWindow);
     if deprecated ==true
         if pred(iPred).maskOut==7 || pred(iPred).maskOut==1
