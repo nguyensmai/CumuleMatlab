@@ -13,7 +13,7 @@ if rand()< QUAL_PROG
     for iPred = 1:nPred
         if ~isempty(pred(iPred).meanError) && ... % pred(iPred).meanError<THRES_GOOD_PRED && ...
                 ~isempty(pred(iPred).progress)
-            prob(iPred) = pred(iPred).progress;
+            prob(iPred) = max(0,pred(iPred).progress);
             %        prob(iPred) = min(1,pred(iPred).quality);
             %prob(iPred) = 1/pred(iPred).meanError;
         else

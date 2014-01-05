@@ -12,8 +12,8 @@ if numel(pred)>=1
     %while iPred <=numel(pred)
     [deprecated pred(iPred)] = deprecateBadPredictor( pred(iPred), memory, time, timeWindow);
     if deprecated ==true
-%        if pred(iPred).maskOut==7 || pred(iPred).maskOut==1
-        if pred(iPred).maskOut==1
+        if pred(iPred).maskOut==7 || pred(iPred).maskOut==1
+%        if pred(iPred).maskOut==1
             pred(iPred)
             disp('what');
         end

@@ -163,7 +163,7 @@ classdef FFN
                     obj.quality = predict(tdLearner,  -log10(stp1));
                 end
                 
-                if abs(obj.quality)>rand()+1
+                if obj.quality>1 + rand() +0.3*exp(-numel(obj.sseRec)/10^4)
                     deprecated = true;
                 end
             end

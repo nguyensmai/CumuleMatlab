@@ -22,7 +22,7 @@ mt   = env.randomAction;
 st   = 2*rand(1,dimO)-1;
 % 7: initialise short-term memory
 sMemory = zeros(MEMORY_SIZE, dimO+dimM+1);
-save test_initialisation_gamma1
+%save test_initialisation_gamma1
 time = 1;
 
 %td learning for the errors
