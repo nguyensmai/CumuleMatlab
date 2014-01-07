@@ -40,7 +40,7 @@ classdef FFN
             % are outputs
             % hiddenSize1, hiddenSize2 : integer. size of hidden layers.
             % inputsSet :  vector: sensorimotor variables
-            obj.eta   = 0.2;        % Learning rate. Note: eta = 1 is very large.
+            obj.eta   = 0.01;        % Learning rate. Note: eta = 1 is very large.
             obj.alpha = 0.6;    % Momentum term
             % Add a column of 1's to patterns to make a bias node
             obj.sizeInp  = numel(inputMask)+1;
@@ -106,13 +106,16 @@ classdef FFN
             df2 = hidWithBias2 .* (1-hidWithBias2);
             dw2 = obj.eta * hidWithBias1' * (deltas_hid2.*df2(1:end-1));
             dw2 = dw2 + obj.alpha * obj.dw2Last;
-            dw3 = obj.eta * hidWithBias2' * deltas_out.* predictedOut .* (1-predictedOut);
+            df3 = (predictedOut .* (1-predictedOut));
+            dw3 = obj.eta * hidWithBias2' * (deltas_out.* df3);
             dw3 = dw3 + obj.alpha * obj.dw3Last;
             obj.w1 = w1 + dw1; obj.w2 = w2 + dw2; obj.w3 = w3 + dw3;     % Weight update
             obj.dw1Last = dw1; obj.dw2Last = dw2; obj.dw3Last = dw3;     % Update momentum records
             obj.sseRec = [obj.sseRec sse];
         end
         
+        
+       
         
         function [deprecated,  obj] = deprecateBadPredictor( obj, memory, time, timeWindow)
             global tdLearner
