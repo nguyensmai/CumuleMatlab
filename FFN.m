@@ -107,10 +107,10 @@ classdef FFN
                 qualityPredictor2 = qualityError(obj.meanError) ;
                 
                 current_error = zeros(timeWindow-1,1);
-                for i=1:timeWindow-1
-                    data_in          = memory(i,[obj.maskInp end]);
-                    desired_out      = memory(i+iTime,[obj.maskOut]);
-                    current_error(i) = errorInPrediction(obj,data_in, desired_out);
+				for i=timeWindow:-1:iTime+1
+                    data_in          = memory(i-iTime,[obj.maskInp end]);
+                    desired_out      = memory(i,[obj.maskOut]);
+                    current_error(i) = errorInPrediction(obj, data_in, desired_out);
                 end
                 obj.progress       = obj.meanError - mean(current_error);
                 qualityPredictor1     = qualityProgress(obj.progress);
