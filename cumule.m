@@ -4,6 +4,7 @@
 
 %%PARAMETERS
 nPred = 8;
+nTime = 10;
 dimM = 2;
 dimO = 8;
 MEMORY_SIZE  = 500;
@@ -13,7 +14,13 @@ nbFixed = 0;
 env = Environment(dimO,dimM);
 inputsSet = 1:(dimO+dimM) ;
 % 4: InitialisenPredpredictors(hand-coded).
-pred = initialisePredictors(nPred,inputsSet, env);
+pred = []
+for iTime = 1:nTime
+  predITime = initialisePredictors(nPred,inputsSet, env);
+  % pred(k) = predictors for t+k
+  % pred(k, l) = predictor for state l at time t+k
+  pred = [pred; predITime]
+end
 % 5: m?randommotorcommand
 mt   = env.randomAction;
 % 6:	s(t )	?	initial	state.
@@ -46,15 +53,17 @@ while true
     
     %     16:	sm(t+1) ? read sensorimotor data
     
-    
-    %     17:	(pred, outPred, error, errMap) = TrainPredictors(pred, nPred, predData, sm)
-    [pred, outPred, error] = TrainPredictors(pred, [], smt, stp1 ) ;
-    
-    
+    for iTime=1:nTime
+	  if mod(time, MEMORY_SIZE) > iTime
+		smtMinusITime = sMemory(mod(time, MEMORY_SIZE) - iTime, :);
+		%     17:	(pred, outPred, error, errMap) = TrainPredictors(pred, nPred, predData, sm)
+		[pred(iTime), outPred, error] = TrainPredictors(pred(iTime), [], smtMinusITime, stp1);
+	  end
+    end
     
     %% 18:	Neural patterns:
     % 19:	pred = DeprecateBadPredictors(pred, ? error)
-    [pred nPred] = deprecateBadPredictors(pred, sMemory, time,  inputsSet, dimO, dimM, MEMORY_SIZE);
+    [pred nPred] = deprecateBadPredictors(pred, sMemory, time, nTime, inputsSet, dimO, dimM, MEMORY_SIZE);
     %inputsSet    = increaseInputsSet(inputsSet, pred, nbFixed, dimM, dimO);
     
     % 25:	(pred, inPred, outPred ) = multiplicatePredictors(pred, inputsSet)

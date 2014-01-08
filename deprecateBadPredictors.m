@@ -1,4 +1,4 @@
-function [pred nPred] = deprecateBadPredictors(pred, memory, time, inputsSet,dimO,dimM,timeWindow)
+function [pred nPred] = deprecateBadPredictors(pred, memory, time, nTime, inputsSet,dimO,dimM,timeWindow)
 %parameters
 
 
@@ -8,22 +8,22 @@ progress  = zeros(1,nPred);
 meanError = zeros(1,nPred);
 iPred = 1;
 
-if numel(pred)>=1
-    iPred = mod(time,numel(pred))+1;
+if size(pred, 2)>=1
+  for iTime = 1:nTime
+    iPred = mod(time, size(pred, 2))+1;
     %while iPred <=numel(pred)
-    [deprecated pred(iPred)] = deprecateBadPredictor( pred(iPred), memory, time, timeWindow);
+    [deprecated pred(iTime, iPred)] = deprecateBadPredictor(pred(iTime, iPred), memory, time, iTime, timeWindow);
     if deprecated ==true
-        maskOut   = pred(iPred).maskOut;
-        probInput = pred(iPred).probInput;
-        pred =  pred([1:iPred-1 iPred+1:end]);
-        [pred nPred] = multiplicatePredictors(inputsSet, pred,dimO,dimM, maskOut, probInput);
+        maskOut   = pred(iTime, iPred).maskOut;
+        probInput = pred(iTime, iPred).probInput;
+        pred =  pred(iTime, [1:iPred-1 iPred+1:end]);
+        [pred(iTime) nPred] = multiplicatePredictors(inputsSet, pred(iTime),dimO,dimM, maskOut, probInput);
     else
         iPred = iPred +1;
     end
     nPred = numel(pred);
-    
+  end
 end
-
 end
 
 

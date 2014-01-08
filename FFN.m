@@ -100,7 +100,7 @@ classdef FFN
         end
         
         
-        function [deprecated  obj] = deprecateBadPredictor( obj, memory, time, timeWindow)
+        function [deprecated  obj] = deprecateBadPredictor(obj, memory, time, iTime, timeWindow)
             deprecated = false;
             if time>timeWindow+1 && numel(obj.sseRec)>timeWindow+1
                 obj.meanError  = mean(obj.sseRec(end-timeWindow:end));
@@ -109,7 +109,7 @@ classdef FFN
                 current_error = zeros(timeWindow-1,1);
                 for i=1:timeWindow-1
                     data_in          = memory(i,[obj.maskInp end]);
-                    desired_out      = memory(i+1,[obj.maskOut]);
+                    desired_out      = memory(i+iTime,[obj.maskOut]);
                     current_error(i) = errorInPrediction(obj,data_in, desired_out);
                 end
                 obj.progress       = obj.meanError - mean(current_error);
