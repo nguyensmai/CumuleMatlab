@@ -3,7 +3,7 @@ function [pred nPred] = deprecateBadPredictors(pred, memory, time, nTime, inputs
 
 
 %intialisation
-nPred = numel(pred);
+nPred = size(pred, 2);
 progress  = zeros(1,nPred);
 meanError = zeros(1,nPred);
 iPred = 1;
@@ -16,14 +16,12 @@ if size(pred, 2)>=1
     if deprecated ==true
         maskOut   = pred(iTime, iPred).maskOut;
         probInput = pred(iTime, iPred).probInput;
-        pred =  pred(iTime, [1:iPred-1 iPred+1:end]);
+        pred(iTime) =  pred(iTime, [1:iPred-1 iPred+1:end]);
         [pred(iTime) nPred] = multiplicatePredictors(inputsSet, pred(iTime),dimO,dimM, maskOut, probInput);
     else
         iPred = iPred +1;
     end
-    nPred = numel(pred);
+    nPred = size(pred, 2);
   end
 end
 end
-
-
