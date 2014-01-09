@@ -18,21 +18,18 @@ method = 'copy ';
 mutated = 0;
 
 % mutation
-if rand()< MUTATE_MASK_PROBABILITY
-    swap1 = randperm(sizeInput,2);
-    swap2 = randperm(sizeInput,2);
-    bitsInp(swap1) = bitsInp(swap2);
+if rand()< MUTATE_MASK_PROBABILITY/2
+    swap1 = randi(sizeInput,1);
+    bitsInp(swap1) = 1-bitsInp(swap1);
     mutated = 1;
     method = ['mutate input '];
-end
-
-if rand()<MUTATE_MASK_PROBABILITY
+elseif rand()<MUTATE_MASK_PROBABILITY/2
     swap1 = randperm(dimO,2);
-    swap2 = randperm(dimO,2);
-    bitsOut(swap1) = bitsOut(swap2);
+    bitsOut(swap1) = bitsOut(swap1(2:-1:1));
     mutated = 1;
     method = ['mutate output '];
 end
+
 [a maskInp] = find(bitsInp==1);
 [a maskOut] = find(bitsOut==1);
 
@@ -40,7 +37,8 @@ if isempty(maskInp)
     maskInp = randi(sizeInput,1);
 end
 
-if isempty(maskOut)
+%if isempty(maskOut)
+if (sum(maskOut)~=1)
    maskOut = randi(dimO, 1); 
 end
     

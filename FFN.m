@@ -91,7 +91,11 @@ classdef FFN
             w3 = obj.w3;
                        [predictedOut, hidWithBias1, hidWithBias2]= predict(obj,input);
             deltas_out = target - predictedOut;   % Error matrix
-            sse = norm(deltas_out,2)/sqrt(obj.sizeOut); % Sum sqr error, matrix style
+            parfor i=1:size(deltas_out,1)
+            ssei(i) = norm(deltas_out(i,:)); % Sum sqr error, matrix style
+            end
+            sse = mean(ssei)/sqrt(obj.sizeOut); % Sum sqr error, matrix style
+
             % delta=dE/do * do/dnet
             deltas_hid2 = deltas_out*w3';
             deltas_hid2(:,size(deltas_hid2,2)) = [];
@@ -101,10 +105,10 @@ classdef FFN
             
             % The key backprop step, in matrix form
             df1 = hidWithBias1 .* (1-hidWithBias1);
-            dw1 = obj.eta * input' * (deltas_hid1.* df1(1:end-1));
+            dw1 = obj.eta * input' * (deltas_hid1.* df1(:,1:end-1));
             dw1 = dw1 + obj.alpha * obj.dw1Last; 
             df2 = hidWithBias2 .* (1-hidWithBias2);
-            dw2 = obj.eta * hidWithBias1' * (deltas_hid2.*df2(1:end-1));
+            dw2 = obj.eta * hidWithBias1' * (deltas_hid2.*df2(:,1:end-1));
             dw2 = dw2 + obj.alpha * obj.dw2Last;
             df3 = (predictedOut .* (1-predictedOut));
             dw3 = obj.eta * hidWithBias2' * (deltas_out.* df3);

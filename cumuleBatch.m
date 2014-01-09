@@ -9,27 +9,34 @@ nPred = 80;
 dimM = 2;
 dimO = 8;
 MEMORY_SIZE  = 500;
-BATCH_SIZE   = 10;
+BATCH_SIZE   = 20;
 
 %% 3: INITIALISATION
+s = RandStream('mt19937ar','Seed',1);
+RandStream.setGlobalStream(s);
 nbFixed = 0;
 env = Environment(dimO,dimM);
 inputsSet = 1:(dimO+dimM) ;
-% 4: InitialisenPredpredictors(hand-coded).
-%pred = initialisePredictors(nPred,inputsSet, env);
-% 5: m?randommotorcommand
-mt   = env.randomAction;
-% 6:	s(t )	?	initial	state.
-st   = 2*rand(1,dimO)-1;
 % 7: initialise short-term memory
 sMemory = zeros(MEMORY_SIZE, dimO+dimM+1);
 %save test_initialisation_gamma1
 time = 1;
+outArchive = []; %archive of the outputs of the good predictors
 errorLt = [];
 progressLt = [];
 copyLt=[];
 outputsLt ={};
 inputsMappingTo = [];
+%matlabpool('open',12);
+
+
+% 4: InitialisenPredpredictors(hand-coded).
+pred = initialisePredictors(nPred,inputsSet, env);
+% 5: m?randommotorcommand
+mt   = env.randomAction;
+% 6:	s(t )	?	initial	state.
+st   = 2*rand(1,dimO)-1;
+
 
 %td learning for the errors
 % global tdLearner
@@ -44,9 +51,7 @@ inputsMappingTo = [];
 % load tdLearner % to load the fitness function
 % % to create a new fitness function
 % %tdLearner = TdLearning(nbTiles^dimTD*nbLayers, 0.1, 1, tileC);
-% matlabpool('open',nPred);
 
-pred = initialisePredictors(nPred,inputsSet, env);
 %% 9: while true do
 
 while true
@@ -83,8 +88,9 @@ while true
     
     %% 18:	Neural patterns:
     % 19:	pred = DeprecateBadPredictors(pred, ? error)
-    [pred, nPred, mutated] = deprecateBadPredictorsBatch(pred, inputsSet, dimO, errorL, progressL);
-    
+    %[outArchive, pred] =  updateArchive(outArchive, pred);
+    [pred, nPred, mutated, outArchive] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL,time);
+
     
     %% post-processing
     if mutated ==1
@@ -98,14 +104,14 @@ while true
     
     inputsLt{time} = [];
     for iPred = 1:nPred
-        inputsLt{time}{iPred} = pred(iPred).maskOut;
+        inputsLt{time}{iPred} = pred(iPred).maskInp;
     end
     
-  for iOut=1:dimO
-    for input = 1: numel(inputsSet)
-        inputsMappingTo(iOut,input,time) =0;
+    for iOut=1:dimO
+        for input = 1: numel(inputsSet)
+            inputsMappingTo(iOut,input,time) =0;
+        end
     end
-  end
     
     for iPred=1:nPred
         for iOut=outputsLt{time}{iPred}
@@ -115,14 +121,43 @@ while true
         end
     end
     
-    if mod(time,200000)==0
-        save(['test_learning_',num2str(floor(time/200000))])
+    
+    errorPerOutC = cell(nPred);
+    errorArchOutC = cell(nPred);
+    for iPred=1:nPred
+        if ~isempty(pred(iPred).sseRec)
+            errorPerOutC{pred(iPred).maskOut} =  [errorPerOutC{pred(iPred).maskOut}; pred(iPred).sseRec(end)];
+            if pred(iPred).idFixed>1
+                errorArchOutC{pred(iPred).maskOut} =  [errorArchOutC{pred(iPred).maskOut}; pred(iPred).sseRec(end)];
+            end
+        end
     end
-    visualisation_cumuleBatch
+    
+    for iDim=1:dimO
+            errorPerOut(iDim,time) =  mean(errorPerOutC{iDim});
+            nbPerOut(iDim,time) = numel(errorPerOutC{iDim});
+            errorArchOut(iDim,time) =  mean(errorArchOutC{iDim});
+            nbArchOut(iDim,time) = numel(errorArchOutC{iDim});
+   end
+    
+    
+    
+    if mod(time,100)==0
+        save(['test_learning_',num2str(floor(time/100))])
+    end
     time = time + 1;
+visualisation_cumuleBatch
 end
 
 %% plot results
+
+for iPred=1:nPred
+    if pred(iPred).idFixed>1
+        iPred
+        pred(iPred)
+    end
+end
+
 for iPred = 1:nPred
     iPred
     pred(iPred)
