@@ -63,7 +63,7 @@ while true
     
     %% 18:	Neural patterns:
     % 19:	pred = DeprecateBadPredictors(pred, ? error)
-    [pred nPred] = deprecateBadPredictors(pred, sMemory, time, nTime, inputsSet, dimO, dimM, MEMORY_SIZE);
+    %[pred nPred] = deprecateBadPredictors(pred, sMemory, time, nTime, inputsSet, dimO, dimM, MEMORY_SIZE);
     %inputsSet    = increaseInputsSet(inputsSet, pred, nbFixed, dimM, dimO);
     
     % 25:	(pred, inPred, outPred ) = multiplicatePredictors(pred, inputsSet)

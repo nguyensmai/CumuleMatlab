@@ -28,7 +28,7 @@ classdef FFN
     methods
         function obj = FFN(inputMask, outputMask,hiddenSize1, hiddenSize2, inputsSet)
             %%%%%%%%%%%%%%%%%%% Initial setting up of the variables
-            obj.eta = 0.01;        % Learning rate. Note: eta = 1 is very large.
+            obj.eta = 0.1;        % Learning rate. Note: eta = 1 is very large.
             obj.alpha = 0.95;    % Momentum term
             % Add a column of 1's to patterns to make a bias node
             obj.sizeInp  = numel(inputMask)+1;
@@ -127,7 +127,7 @@ classdef FFN
                         ' quality is ', num2str(qualityPredictor2), ' ',num2str(qualityPredictor1), ' ',num2str(obj.quality), ...
                         ' at time ', num2str(numel(obj.sseRec))     ]);
                     if obj.maskOut == 1 || obj.maskOut == 7
-                        disp('DEPRECATEBADPREDICTORS why?')
+                        disp(['DEPRECATEBADPREDICTORS why?', obj.maskOut])
                     end
                     deprecated = true;
                     delta = zeros(1,obj.sizeInp-1);
