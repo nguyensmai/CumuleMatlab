@@ -9,11 +9,10 @@ nPred = 80;
 dimM = 2;
 dimO = 8;
 MEMORY_SIZE  = 500;
-BATCH_SIZE   = 20;
+BATCH_SIZE   = 100;
 
 %% 3: INITIALISATION
-s = RandStream('mt19937ar','Seed',1);
-RandStream.setGlobalStream(s);
+rng('shuffle');
 nbFixed = 0;
 env = Environment(dimO,dimM);
 inputsSet = 1:(dimO+dimM) ;
@@ -21,12 +20,16 @@ inputsSet = 1:(dimO+dimM) ;
 sMemory = zeros(MEMORY_SIZE, dimO+dimM+1);
 %save test_initialisation_gamma1
 time = 1;
-outArchive = []; %archive of the outputs of the good predictors
+outArchive = OutputArchive(); %archive of the outputs of the good predictors
 errorLt = [];
 progressLt = [];
 copyLt=[];
 outputsLt ={};
 inputsMappingTo = [];
+nbArchOut = [];
+errorArchOut = [];
+errorPerOut =  [];
+nbPerOut = [];
 %matlabpool('open',12);
 
 
@@ -90,7 +93,7 @@ while true
     % 19:	pred = DeprecateBadPredictors(pred, ? error)
     %[outArchive, pred] =  updateArchive(outArchive, pred);
     [pred, nPred, mutated, outArchive] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL,time);
-
+    
     
     %% post-processing
     if mutated ==1
@@ -134,19 +137,19 @@ while true
     end
     
     for iDim=1:dimO
-            errorPerOut(iDim,time) =  mean(errorPerOutC{iDim});
-            nbPerOut(iDim,time) = numel(errorPerOutC{iDim});
-            errorArchOut(iDim,time) =  mean(errorArchOutC{iDim});
-            nbArchOut(iDim,time) = numel(errorArchOutC{iDim});
-   end
+        errorPerOut(iDim,time) =  mean(errorPerOutC{iDim});
+        nbPerOut(iDim,time) = numel(errorPerOutC{iDim});
+        errorArchOut(iDim,time) =  mean(errorArchOutC{iDim});
+        nbArchOut(iDim,time) = numel(errorArchOutC{iDim});
+    end
     
     
     
     if mod(time,100)==0
-        save(['test_learning_',num2str(floor(time/100))])
+        save(['test_progress_',num2str(floor(time/100))])
     end
     time = time + 1;
-visualisation_cumuleBatch
+    visualisation_cumuleBatch
 end
 
 %% plot results

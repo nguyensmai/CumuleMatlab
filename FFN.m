@@ -58,6 +58,7 @@ classdef FFN
             obj.maskOut   = outputMask;
             obj.idFixed   = -1;
             obj.probInput = ones(size(inputsSet));
+            obj.quality = 0;
         end %end function constructor
         
         function [predictedOut, hidWithBias1, hidWithBias2]= predict(obj,input)
@@ -89,7 +90,7 @@ classdef FFN
             w1 = obj.w1;
             w2 = obj.w2;
             w3 = obj.w3;
-                       [predictedOut, hidWithBias1, hidWithBias2]= predict(obj,input);
+            [predictedOut, hidWithBias1, hidWithBias2]= predict(obj,input);
             deltas_out = target - predictedOut;   % Error matrix
             parfor i=1:size(deltas_out,1)
             ssei(i) = norm(deltas_out(i,:)); % Sum sqr error, matrix style

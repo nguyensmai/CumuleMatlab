@@ -1,6 +1,7 @@
 function [pred, outPred, errorL, progressL] = TrainPredictorsBatch(pred, memory, batch_size, dimO)
 % PARAMETERS
 NB_EPOCHS = 10;
+global error
 
 % INITIALISATION
 nPred   = numel(pred);
@@ -18,15 +19,17 @@ for iPred = 1:nPred
         
         [sse pred_out pred(iPred)] = ...
             bkprop(pred(iPred), data_in, desired_out);
-        error(iPred, iEpoch)   = error(iPred, iEpoch) + sse;
+        error(iPred, iEpoch)   =  sse;
     end
-    error(iPred, iEpoch) = error(iPred, iEpoch)/batch_size;
 end
 
 
 errorL = error(:,end) ; %mean(error,2);
 progressL = error(:,1)- error(:,end);
 
+for iPred=1:nPred
+pred(iPred).quality = progressL(iPred) ; %+ 0.9*pred(iPred).quality;    
+end
 
 end
 
