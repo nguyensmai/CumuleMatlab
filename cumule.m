@@ -7,7 +7,7 @@ nPred = 8;
 nTime = 10;
 dimM = 2;
 dimO = 8;
-MEMORY_SIZE  = 500;
+MEMORY_SIZE = 500;
 
 %% 3: INITIALISATION
 nbFixed = 0;
@@ -16,17 +16,17 @@ inputsSet = 1:(dimO+dimM) ;
 % 4: InitialisenPredpredictors(hand-coded).
 pred = []
 for iTime = 1:nTime
-  predITime = initialisePredictors(nPred,inputsSet, env);
+  predITime = initialisePredictors(nPred,inputsSet, env, iTime);
   % pred(k) = predictors for t+k
   % pred(k, l) = predictor for state l at time t+k
-  pred = [pred; predITime]
+  pred = [pred predITime]
 end
 % 5: m?randommotorcommand
 mt   = env.randomAction;
 % 6:	s(t )	?	initial	state.
 st   = 2*rand(1,dimO)-1;
 % 7: initialise short-term memory
-sMemory = zeros(MEMORY_SIZE, dimO+dimM+1);
+sMemory = []; %zeros(MEMORY_SIZE, dimO+dimM+1);
 save test_initialisation
 time = 1;
 
@@ -46,20 +46,15 @@ while true
     %     14:	Execute a motor command m chosen randomly
     mt   = env.randomAction;
     smt = ([st  mt 1]+1)/2;
-    sMemory(mod(time,MEMORY_SIZE)+1,:)=smt;
+    sMemory = [sMemory; smt];
 
     %     15:	s(t + 1) ? read from sensorimotor data the new state.
     stp1  = executeAction(env, st, mt);
     
     %     16:	sm(t+1) ? read sensorimotor data
-    
-    for iTime=1:nTime
-	  if mod(time, MEMORY_SIZE) > iTime
-		smtMinusITime = sMemory(mod(time, MEMORY_SIZE) - iTime, :);
-		%     17:	(pred, outPred, error, errMap) = TrainPredictors(pred, nPred, predData, sm)
-		[pred(iTime), outPred, error] = TrainPredictors(pred(iTime), [], smtMinusITime, stp1);
-	  end
-    end
+
+	%     17:	(pred, outPred, error, errMap) = TrainPredictors(pred, nPred, predData, sm)
+	[pred, outPred, error] = TrainPredictors(pred, [], sMemory, stp1, time);
     
     %% 18:	Neural patterns:
     % 19:	pred = DeprecateBadPredictors(pred, ? error)

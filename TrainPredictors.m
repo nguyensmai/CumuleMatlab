@@ -1,15 +1,19 @@
-function [pred, outPred, error] = TrainPredictors(pred, predData, smt, stp1 )
+function [pred, outPred, error] = TrainPredictors(pred, predData, ...
+												  memory, stp1, time)
 stp1 = (stp1+1)/2;
 nPred = numel(pred);
 error  = -ones(1,nPred);
 outPred = cell(1,nPred);
 
 for iPred = 1:nPred
-    data_in   = smt([pred(iPred).maskInp end]);
-    desired_out        = stp1([pred(iPred).maskOut]);
-    [sse pred_out pred(iPred)] = ...
-        bkprop(pred(iPred), data_in, desired_out);
-    error(iPred)   = sse;
+    if size(memory, 1) > (pred(iPred).delay)
+	  smt = memory(end +1 - pred(iPred).delay, :);
+	  data_in = smt([pred(iPred).maskInp end]);
+	  desired_out = stp1([pred(iPred).maskOut]);
+	  [sse pred_out pred(iPred)] = ...
+		  bkprop(pred(iPred), data_in, desired_out);
+	  error(iPred)   = sse;
+	end
 %     outPred{iPred} =  2*pred_out-1;
 %      [sse pred_out pred(iPred)] = ...
 %         bkprop(pred(iPred), data_in, desired_out);

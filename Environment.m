@@ -33,16 +33,16 @@ classdef Environment < handle
             end
             
             
-            outputState(1) = 1; %min(1, max(cos(state(1)+action(1)),-1));
-            outputState(2) = 0; %min(1, max(cos(state(2)+action(2)),-1));
-            outputState(3) = min(1, max(cos((state(1)+action(1))^2+(state(2)+action(2))^2),-1));
+            outputState(1) = mod(obj.hiddenState, 7)/7; %1; %min(1, max(cos(state(1)+action(1)),-1));
+            outputState(2) = 0.1*(mod(floor(obj.hiddenState/5), 10)); %0; %min(1, max(cos(state(2)+action(2)),-1));
+            outputState(3) = 1; %min(1, max(cos((state(1)+action(1))^2+(state(2)+action(2))^2),-1));
             obj.hiddenState = obj.hiddenState+1;
             outputState(4) =  min(1, max(cos(state(1)+state(2)),-1)); %sin(obj.hiddenState);
             outputState(5) =  min(1, max(cos(action(1)+action(2)),-1)); %sin(obj.hiddenState);
             
             outputState(6) =  min(1, max(state(4)^2+ state(5)^2,-1)); 
             outputState(7) =  min(1, max(state(1)^2 + state(2)^2 ,-1)); 
-            outputState(8) =  min(1, max(state(3)^2 + state(4)^2 ,-1)); 
+            outputState(8) =  min(1, max(state(3)^2 + state(4)^2 ,-1));
             
 %             if state(1)+action(1)<0
 %                 outputState(5) = 0;

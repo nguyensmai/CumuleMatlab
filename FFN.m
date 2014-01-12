@@ -22,11 +22,12 @@ classdef FFN
         idFixed
         method
         probInput
+		delay
     end
     
     
     methods
-        function obj = FFN(inputMask, outputMask,hiddenSize1, hiddenSize2, inputsSet)
+        function obj = FFN(inputMask, outputMask, hiddenSize1, hiddenSize2, inputsSet, delay)
             %%%%%%%%%%%%%%%%%%% Initial setting up of the variables
             obj.eta = 0.1;        % Learning rate. Note: eta = 1 is very large.
             obj.alpha = 0.95;    % Momentum term
@@ -46,6 +47,7 @@ classdef FFN
             obj.maskOut   = outputMask;
             obj.idFixed   = -1;
             obj.probInput = ones(size(inputsSet));
+			obj.delay = delay;
         end %end function constructor
         
         function [predictedOut, hidWithBias1, hidWithBias2]= predict(obj,input)
