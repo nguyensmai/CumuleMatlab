@@ -54,10 +54,11 @@ classdef FFN
             obj.dw2Last   = zeros(size(obj.w2));
             obj.dw3Last   = zeros(size(obj.w3));
             obj.sseRec    = [];
+            obj.meanError = 10;
             obj.maskInp   = inputMask;
             obj.maskOut   = outputMask;
             obj.idFixed   = -1;
-            obj.probInput = ones(size(inputsSet));
+            obj.probInput = 0.4*ones(size(inputsSet));
             obj.quality = 0;
         end %end function constructor
         

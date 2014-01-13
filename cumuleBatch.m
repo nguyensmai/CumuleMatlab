@@ -84,9 +84,10 @@ while true
     end
     
     %     17:	(pred, outPred, error, errMap) = TrainPredictors(pred, nPred, predData, sm)
-    [pred, outPred, errorL, progressL] = TrainPredictorsBatch(pred, sMemory, BATCH_SIZE, dimO) ;
+    [pred, outPred, errorL] = TrainPredictorsBatch(pred, sMemory, BATCH_SIZE, dimO) ;
     errorLt = [errorLt; errorL'];
-    progesssLt = [progressLt; progressL'];
+    progressL = [];
+   % progesssLt = [progressLt; progressL'];
     
     
     %% 18:	Neural patterns:
@@ -145,9 +146,9 @@ while true
     
     
     
-    if mod(time,100)==0
-        save(['test_progress_',num2str(floor(time/100))])
-    end
+%     if mod(time,100)==0
+%         save(['test_progress_',num2str(floor(time/100))])
+%     end
     time = time + 1;
     visualisation_cumuleBatch
 end

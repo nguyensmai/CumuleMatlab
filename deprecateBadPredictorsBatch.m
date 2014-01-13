@@ -1,4 +1,4 @@
-function [pred nPred mutated, outArchive] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL, time)
+function [pred nPred mutated, outArchive,globalProbInput] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL, time)
 %parameters
 ARCHIVE_THRES = 0.02;
 dimInp = numel(inputsSet);
@@ -8,7 +8,7 @@ nPred = numel(pred);
 already1 = [];
 already2 = [];
 
-for iDepr = 1:1 %nPred/10
+for iDepr = 1:nPred/10
     iPreds = randperm(nPred,2);
     iPred1 = iPreds(1);
     iPred2 = iPreds(2);
@@ -29,16 +29,19 @@ for iDepr = 1:1 %nPred/10
             pred(iPred2).maskOut = pred(iPred1).maskOut;
             probInput = mean([pred(iPred2).probInput/sum(pred(iPred2).probInput);...
                 pred(iPred1).probInput/sum(pred(iPred1).probInput)])+ ...
-                0.1*rand(1,dimInp);
+                0.05*rand(1,dimInp);
             [pred(iPred2), mutated] = copyAndMutate( pred(iPred2), inputsSet,dimO,probInput);
             pred(iPred2).probInput = probInput;
         else %iPred2 is in the archive
+            pred(iPred2).probInput(pred(iPred2).maskInp) =  pred(iPred2).probInput(pred(iPred2).maskInp)* 1.1;
+%             pred(iPred2).probInput(pred(iPred2).maskInp) =  pred(iPred2).probInput(pred(iPred2).maskInp)* (1+exp(-pred(iPred2).meanError/ARCHIVE_THRES));
+            pred(iPred2).probInput = pred(iPred2).probInput/max(pred(iPred2).probInput);
             if rand()< 1-10*pred(iPred1).quality && pred(iPred1).idFixed==-1
                 newPred = pred(iPred2);
                 newPred.maskOut = pred(iPred1).maskOut;
                 probInput = mean([pred(iPred2).probInput/sum(pred(iPred2).probInput);...
                     pred(iPred1).probInput/sum(pred(iPred1).probInput)])+ ...
-                    0.1*rand(1,dimInp);
+                    0.05*rand(1,dimInp);
                 [pred(iPred1), mutated] = copyAndMutate(newPred, inputsSet, dimO,probInput);
                 pred(iPred1).probInput = probInput;
             end
@@ -48,34 +51,43 @@ for iDepr = 1:1 %nPred/10
             pred(iPred1).maskOut = pred(iPred2).maskOut;
             probInput = mean([pred(iPred2).probInput/sum(pred(iPred2).probInput);...
                 pred(iPred1).probInput/sum(pred(iPred1).probInput)])+ ...
-                0.1*rand(1,dimInp);
+                0.05*rand(1,dimInp);
             [pred(iPred1), mutated] = copyAndMutate( pred(iPred1), inputsSet, dimO,probInput);
             pred(iPred1).probInput = probInput;
         else
+            pred(iPred1).probInput(pred(iPred1).maskInp) =  pred(iPred1).probInput(pred(iPred1).maskInp)* 1.1;
+%             pred(iPred1).probInput(pred(iPred1).maskInp) =  pred(iPred1).probInput(pred(iPred1).maskInp)* (1+exp(-pred(iPred1).meanError/ARCHIVE_THRES));
+            pred(iPred1).probInput = pred(iPred1).probInput/max(pred(iPred1).probInput);
             if rand()< 1-10*pred(iPred2).quality && pred(iPred2).idFixed==-1
                 newPred = pred(iPred1);
                 newPred.maskOut = pred(iPred2).maskOut;
                 probInput = mean([pred(iPred2).probInput/sum(pred(iPred2).probInput);...
                     pred(iPred1).probInput/sum(pred(iPred1).probInput)])+ ...
-                    0.1*rand(1,dimInp);
+                    0.05*rand(1,dimInp);
                 [pred(iPred2), mutated] = copyAndMutate(newPred, inputsSet, dimO,probInput);
                 pred(iPred1).probInput = probInput;
             end
         end
     else
         % deprecate based on fitness value
-        if (fitness1>fitness2) && (pred(iPred2).idFixed ==-1)
+        if (fitness1>fitness2) && (pred(iPred2).idFixed ==-1) && (rand<(fitness1-fitness2)/fitness1)
+            pred(iPred1).probInput(pred(iPred1).maskInp)=pred(iPred1).probInput(pred(iPred1).maskInp)* 1.1;
+%             pred(iPred1).probInput(pred(iPred1).maskInp)=pred(iPred1).probInput(pred(iPred1).maskInp)* (1+exp(-pred(iPred1).meanError/ARCHIVE_THRES));
             probInput = mean([pred(iPred2).probInput/sum(pred(iPred2).probInput);...
                 pred(iPred1).probInput/sum(pred(iPred1).probInput)])+ ...
                 0.1*rand(1,dimInp);
-            probInput(pred(iPred2).maskInp)=probInput(pred(iPred2).maskInp)/2;
+%             probInput(pred(iPred2).maskInp)=probInput(pred(iPred2).maskInp)/(1+pred(iPred2).meanError);
+            probInput(pred(iPred2).maskInp)=probInput(pred(iPred2).maskInp)/1.1;
             [pred(iPred2), mutated] = copyAndMutate( pred(iPred1), inputsSet, dimO,probInput);
             pred(iPred2).probInput = probInput;
-        elseif pred(iPred1).idFixed == -1
+        elseif pred(iPred1).idFixed == -1 && (rand<(fitness2-fitness1)/fitness2)
+            pred(iPred2).probInput(pred(iPred2).maskInp)=pred(iPred2).probInput(pred(iPred2).maskInp)* 1.1;
+%             pred(iPred2).probInput(pred(iPred2).maskInp)=pred(iPred2).probInput(pred(iPred2).maskInp)* (1+exp(-pred(iPred2).meanError/ARCHIVE_THRES));
             probInput = mean([pred(iPred2).probInput/sum(pred(iPred2).probInput);...
                 pred(iPred1).probInput/sum(pred(iPred1).probInput)])+ ...
                 0.1*rand(1,dimInp);
-            probInput(pred(iPred1).maskInp)=probInput(pred(iPred1).maskInp)/2;
+            probInput(pred(iPred1).maskInp)=probInput(pred(iPred1).maskInp)/1.1;
+%             probInput(pred(iPred1).maskInp)=probInput(pred(iPred1).maskInp)/(1+pred(iPred1).meanError);
             [pred(iPred1), mutated] = copyAndMutate( pred(iPred2), inputsSet, dimO,probInput);
             pred(iPred1).probInput = probInput;
         end

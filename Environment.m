@@ -43,7 +43,13 @@ classdef Environment < handle
             outputState(6) =  min(1, max(state(3)^2 + state(4)^2+ state(5)^2,-1)); 
             outputState(7) =  min(1, max(state(1)^2 + state(2)^2 +state(3)^2,-1)); 
             outputState(8) =  min(1, max(action(1)^2 + state(4)^2 +state(5)^2,-1)); 
-            
+%             outputState(9) =  rand(); 
+%             outputState(10) =  2*rand() -1; 
+%             outputState(11) =  min(1, max(0.1*state(3)^2 - 0.2*state(4)^2 +0.3* state(5)^2,-1));
+%             outputState(12) =  min(1, max(0.2*state(1)^2 + 0.4*state(2)^2 -0.8*state(3)^2,-1)); 
+%             outputState(13) = min(1, max(cos(0.5*state(1)+0.4*action(1)),-1));
+%             outputState(14) =  mod(obj.hiddenState,10)/5-1; 
+
 %             if state(1)+action(1)<0
 %                 outputState(5) = 0;
 %             elseif state(1)+action(1)<0.8
@@ -51,7 +57,7 @@ classdef Environment < handle
 %             else
 %                 outputState(5) = state(2)+action(2);
 %             end
-            
+            obj.hiddenState= obj.hiddenState+1;
         end %end executeAction
         
 

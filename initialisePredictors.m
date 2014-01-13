@@ -23,8 +23,8 @@ end
 % pred(3) = FFN([1 2 9 10], [3], 25, 25, inputsSet);
 % pred(6) = FFN([4 5], [6],20, 20, inputsSet);  % good for env4 [s1 m1] -> s1
 
-pred(8) = FFN([1 9], [1], 5, 5,inputsSet);  % good for env4 [s1 m1] -> s1
-pred(6) = FFN([1 2 3], [7], 20, 15, inputsSet);  % good for env4 
+% pred(8) = FFN([1 9], [1], 5, 5,inputsSet);  % good for env4 [s1 m1] -> s1
+% pred(6) = FFN([1 2 3], [7], 20, 15, inputsSet);  % good for env4 
 
 % % pre-coded
 % iPred = 1;
