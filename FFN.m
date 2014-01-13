@@ -40,7 +40,7 @@ classdef FFN
             % are outputs
             % hiddenSize1, hiddenSize2 : integer. size of hidden layers.
             % inputsSet :  vector: sensorimotor variables
-            obj.eta   = 0.01;        % Learning rate. Note: eta = 1 is very large.
+            obj.eta   = 0.1;        % Learning rate. Note: eta = 1 is very large.
             obj.alpha = 0.6;    % Momentum term
             % Add a column of 1's to patterns to make a bias node
             obj.sizeInp  = numel(inputMask)+1;

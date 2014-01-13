@@ -31,7 +31,7 @@ errorArchOut = [];
 errorPerOut =  [];
 nbPerOut = [];
 %matlabpool('open',12);
-
+globalProbInput=0.4*ones(dimO,dimM+dimO);
 
 % 4: InitialisenPredpredictors(hand-coded).
 pred = initialisePredictors(nPred,inputsSet, env);
@@ -93,7 +93,7 @@ while true
     %% 18:	Neural patterns:
     % 19:	pred = DeprecateBadPredictors(pred, ? error)
     %[outArchive, pred] =  updateArchive(outArchive, pred);
-    [pred, nPred, mutated, outArchive] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL,time);
+    [pred, nPred, mutated, outArchive,globalProbInput] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL,time,globalProbInput);
     
     
     %% post-processing

@@ -39,7 +39,7 @@ end
 meanError = mean(error,2);
 meanError2 = mean(error2,2);
 for iPred=1:nPred
-    pred(iPred).quality   = pred(iPred).meanError-meanError2(iPred) ; %+ 0.9*pred(iPred).quality;
+    pred(iPred).quality   = pred(iPred).meanError-meanError2(iPred) + 0.9*pred(iPred).quality;
     pred(iPred).meanError = meanError(iPred);
 end
 
