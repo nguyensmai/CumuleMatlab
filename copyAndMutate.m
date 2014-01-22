@@ -53,7 +53,6 @@ if rand()<MUTATE_MASK_PROBABILITY
 end
 
 R1 = pred1.sizeHid1;
-R2 = pred1.sizeHid2;
 % if rand()<MUTATE_MASK_PROBABILITY
 %     R1 = abs(normrnd(0,pred1.sizeHid1));
 % end
@@ -61,7 +60,6 @@ R2 = pred1.sizeHid2;
 %     R2 = abs(normrnd(0,pred1.sizeHid2));
 % end
 sizeHid1 = min([pred1.sizeHid1,R1]);
-sizeHid2 = min([pred1.sizeHid2,R2]);
 
 [a maskInp] = find(bitsInp==1);
 [a maskOut] = find(bitsOut==1);
@@ -77,12 +75,11 @@ end
 
 
 % copy
-pred2         = FFN(maskInp, maskOut, R1, R2, inputsSet, delay);
+pred2         = FFN(maskInp, maskOut, R1, inputsSet, delay);
 minInputSize  = min([numel(maskInp), numel(pred1.maskInp)]);
 minOutputSize = min([numel(maskOut), numel(pred1.maskOut)]);
 pred2.w1(1:minInputSize,1:sizeHid1-1)       = pred1.w1(1:minInputSize,1:sizeHid1-1)+0.05-0.1*rand(minInputSize,sizeHid1-1);
-pred2.w2(1:sizeHid1,1:sizeHid2-1)       = pred1.w2(1:sizeHid1,1:sizeHid2-1)+ 0.05 -0.1*rand(sizeHid1,sizeHid2-1);
-pred2.w3(1:sizeHid2,1:minOutputSize)      = pred1.w3(1:sizeHid2, 1:minOutputSize) + 0.05-0.1*rand(sizeHid2, minOutputSize);
+pred2.w3(1:sizeHid2,1:minOutputSize)      = pred1.w3(1:sizeHid1, 1:minOutputSize) + 0.05-0.1*rand(sizeHid1, minOutputSize);
 pred2.method  = [method , num2str(pred1.maskInp), ' to ', num2str(pred1.maskOut)];
 end
 
@@ -91,7 +88,7 @@ function testCopyAndMutate()
 inputsSet = [1:6];
 dimO=4;
 dimM=2;
-pred1=FFN([2 4], [2],5, 5, inputsSet,1);
+pred1=FFN([2 4], [2], 5, inputsSet,1);
 probInput = zeros(1, dimO+dimM);
 [pred2, mutated] = copyAndMutate(pred1, inputsSet, dimO,probInput)
 %pred2 from pred1 should not change

@@ -33,7 +33,7 @@ classdef FFN
     
     
     methods
-        function obj = FFN(inputMask, outputMask,hiddenSize1, hiddenSize2, inputsSet,delay)
+        function obj = FFN(inputMask, outputMask,hiddenSize1, inputsSet,delay)
             % Contructor of the feed-forward neural network
             % inputMask :  vector. indicates which sensorimotor variables are input
             % outputMask:  vector. indicates which sensorimotor variables

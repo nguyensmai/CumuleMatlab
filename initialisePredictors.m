@@ -11,7 +11,7 @@ function pred = initialisePredictors(nPred, inputsSet, env)
 % outputSize    = numel(outputMask);
 % 
 
- pred(1) = FFN([1 9], [1],5, 5, inputsSet,1);  % good for env4 [s1 m1] -> s1
+ pred(1) = FFN([1 9], [1], 5, inputsSet,1);  % good for env4 [s1 m1] -> s1
 
 %randomly generated
 probInput = 0.4*ones(size(inputsSet));

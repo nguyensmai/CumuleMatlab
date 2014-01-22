@@ -18,7 +18,7 @@ for iPred = 1:nPred
             data_in            = memory(end-batch_size-pred(iPred).delay:end-pred(iPred).delay, [pred(iPred).maskInp end]);
             desired_out        = memory(end-batch_size:end, [pred(iPred).maskOut]);
             [sse pred_out pred(iPred)] = ...
-                bkpropBatch(pred(iPred), data_in, desired_out);
+                bkprop(pred(iPred), data_in, desired_out);
           %  pred(iPred) = pruning(pred(iPred));
             error(iPred, iEpoch)   =  sse;
         end
@@ -30,7 +30,7 @@ for iPred = 1:nPred
             data_in2            = memory(end-2*batch_size-1:end-batch_size-1, [pred(iPred).maskInp end]);
             desired_out2        = memory(end-2*batch_size:end-batch_size, [pred(iPred).maskOut]);
             [sse pred_out pred(iPred)] = ...
-                bkpropBatch(pred(iPred), data_in2, desired_out2);
+                bkprop(pred(iPred), data_in2, desired_out2);
             error2(iPred, iEpoch)   =  sse;
         end
     end

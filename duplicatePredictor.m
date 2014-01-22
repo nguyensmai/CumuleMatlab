@@ -56,7 +56,7 @@ inPredi       = sort(inputMask);
 %     outputMask    = randsample([1:dimO],pred(repPred).sizeOut);
 %     outPredi      = sort(outputMask);
 
-pred(nPred+1)         = FFN(inPredi, outPredi, pred(repPred).sizeHid1, pred(repPred).sizeHid2, inputsSet);
+pred(nPred+1)         = FFN(inPredi, outPredi, pred(repPred).sizeHid1, inputsSet);
 pred(nPred+1).w1      = pred(repPred).w1;
 pred(nPred+1).w2      = pred(repPred).w2;
 pred(nPred+1).probInput=probInput;

@@ -1,6 +1,6 @@
 function     [predi, inputMask, outputMask] = generatePredictor(inputsSet, pred,dimO, outputMask,delay, probInput)
 %parameters
-HIDDEN_MAX = 6;
+HIDDEN_MAX = floor(numel(inputsSet)/2);
 
 %initialisation
 uniqueBool    = 0;
@@ -45,12 +45,9 @@ hiddenSize1 =-1;
 while hiddenSize1<1 || hiddenSize1>HIDDEN_MAX
     hiddenSize1 = max(2,round(HIDDEN_MAX*randn(1)));
 end
-hiddenSize2 =-1;
-while hiddenSize2<1 || hiddenSize2>HIDDEN_MAX
-    hiddenSize2 = max(2,round(HIDDEN_MAX*randn(1)));
-end
 
-predi         = FFN(inputMask, outputMask, hiddenSize1, hiddenSize2, inputsSet, delay);
+
+predi         = FFN(inputMask, outputMask, hiddenSize1, inputsSet, delay);
 predi.probInput = probInput;
 predi.method  = ['generated'];
 end
