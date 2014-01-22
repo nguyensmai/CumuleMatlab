@@ -277,13 +277,7 @@ classdef FFN
         
         function testPruning()
             pred         = FFN([1 2 3 4], [1], 3, 3, [1 2 3 4], 1);
-            for i=1:10000
-                x= rand();
-                inp = [x rand() rand() rand()];
-                [sse, predictedOut, pred, deltas_out] = bkprop(pred,[inp(pred.maskInp) 1],x);
-                %pred = pruning(pred);
-            end
-            inp = [ [1 1 1 1 ];...
+            inpTest = [ [1 1 1 1 ];...
                 [0 1 1 1 ];...
                 [0.5 1 1 1];...
                 [1 0 1 1 ];...
@@ -298,6 +292,17 @@ classdef FFN
                 [1 1 0 0 ];...
                 [0 1 0 0 ];...
                 [0.5 0 1 0];];
+            targetTest = [
+            for i=1:10000
+                x= rand();
+                inp = [x rand() rand() rand()];
+                [sse, predictedOut, pred, deltas_out] = bkprop(pred,[inp(pred.maskInp) 1],x);
+                pred = pruning(pred);
+                test = errorInPrediction(pred,inpTest, target);
+                test_error= [test_error; test];
+                plot(test_error)
+            end
+
             [predictedOut, ~]= predict(pred,[inp(1,pred.maskInp) 1])  %expects 1
             [predictedOut, ~]= predict(pred,[inp(2,pred.maskInp) 1])  %expects 0
             [predictedOut, ~]= predict(pred,[inp(3,pred.maskInp) 1])  %expects 0.5

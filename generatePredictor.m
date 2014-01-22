@@ -1,6 +1,6 @@
 function     [predi, inputMask, outputMask] = generatePredictor(inputsSet, pred,dimO, outputMask,delay, probInput)
 %parameters
-HIDDEN_MAX = floor(numel(inputsSet)/2);
+HIDDEN_MAX = floor(numel(inputsSet));
 
 %initialisation
 uniqueBool    = 0;

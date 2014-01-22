@@ -18,9 +18,22 @@ probInput = 0.4*ones(size(inputsSet));
 
 for iPred=1:nPred
     out =  mod(iPred-1,env.dimO)+1;
-    delay = floor((iPred-1)/env.dimO)+1;
-    [pred(iPred), inPredi, outPredi] = generatePredictor(inputsSet, pred, env.dimO,out, delay, probInput);
+    %delay = floor((iPred-1)/env.dimO)+1;
+    pred(iPred) = FFN(inputsSet, out, 10^(floor(iPred/env.dimO)+1), inputsSet,1); % testing the influence of the hidden layer size
+    %[pred(iPred), inPredi, outPredi] = generatePredictor(inputsSet, pred, env.dimO,out, delay, probInput);
 end
 
+%{ 
+%TEST hidden layer size (1 hidden layer)
+ pred(1) = FFN([1 9], [1], 5, inputsSet,1);  % good for env4 [s1 m1] -> s1
+
+%randomly generated
+probInput = 0.4*ones(size(inputsSet));
+
+for iPred=1:nPred
+    out =  mod(iPred-1,env.dimO)+1;
+    pred(iPred) = FFN(inputsSet, out, 10^(floor(iPred/env.dimO)+1), inputsSet,1); % testing the influence of the hidden layer size
+end
+%}
 
 end
