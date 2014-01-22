@@ -7,29 +7,33 @@ classdef OutputArchive
     methods
         function outputArchive = OutputArchive()
             outputArchive.archiveMatrix = [];
-            outputArchive.ARCHIVE_THRES = 0.02;
+            outputArchive.ARCHIVE_THRES = 0.05;
         end
         
         %find if the output is has already a predictor in the archive
         %returns the index in outArchive, time stored and index in pred
-        function [already, tAlready, iPredAlready] = findOutput(outArchive, out)
+        function [already,outAlready, tAlready,delayAlready, iPredAlready] = findOutput(outArchive, out)
             if isempty(outArchive.archiveMatrix)
                 already = [];
+                outAlready = [];
+                delayAlready=[];
                 tAlready = [];
                 iPredAlready =[];
             else
                 already      = find(outArchive.archiveMatrix(:,1)==out);
-                tAlready     = outArchive.archiveMatrix(already,2);
-                iPredAlready = outArchive.archiveMatrix(already,3);
+                outAlready   = outArchive.archiveMatrix(already,2);
+                delayAlready = outArchive.archiveMatrix(already,3);
+                tAlready     = outArchive.archiveMatrix(already,4);
+                iPredAlready = outArchive.archiveMatrix(already,end);
             end
         end %end function findOutput
         
         function outArchive = addElement(outArchive, pred, iPred, time)
-            outArchive.archiveMatrix = [outArchive.archiveMatrix; pred(iPred).maskOut time iPred];
-        end %end function findOutput
+            outArchive.archiveMatrix = [outArchive.archiveMatrix; pred(iPred).indOutDelay pred(iPred).maskOut pred(iPred).delay time iPred];
+        end %end function addElement
         
         function [outArchive,pred] = changeElement(outArchive,already,iPredAlready, pred,iPred,time)
-            outArchive.archiveMatrix(already,:) = [ pred(iPred).maskOut time iPred];
+            outArchive.archiveMatrix(already,:) = [ pred(iPred).indOutDelay pred(iPred).maskOut pred(iPred).delay time iPred];
             pred(iPredAlready).idFixed = -1;
             pred(iPred).idFixed = time;
         end % end function changeElement
@@ -37,17 +41,17 @@ classdef OutputArchive
          % archive if good predictors
          function [outArchive,pred,already] = checkErrorAndAdd(outArchive,pred,iPred,time)
              already=[];
-             if numel(pred(iPred).sseRec)>12
-                 meanSse1 = mean(pred(iPred).sseRec(end-10:end));
-                 out = pred(iPred).maskOut;
+             if numel(pred(iPred).sseRec)>61
+                 meanSse1 = mean(pred(iPred).sseRec(end-60:end));
+                 out = pred(iPred).indOutDelay;
                  if numel(out)==1
-                     [already, ~, iPredAlready] = findOutput(outArchive, out);
+                     [already,~, ~,~, iPredAlready] = findOutput(outArchive, out);
                      if numel(already)==1
                      %if a predictor already predicts the same output, keep
                      %the best
-                         iPredAlready
-                         pred(iPredAlready)
-                         meanSseAlready = mean(pred(iPredAlready).sseRec(end-10:end));
+%                          iPredAlready
+%                          pred(iPredAlready)
+                         meanSseAlready = mean(pred(iPredAlready).sseRec(end-60:end));
                          if meanSseAlready>meanSse1
                              [outArchive,pred] = changeElement(outArchive, already,iPredAlready, pred, iPred, time);      
                          end

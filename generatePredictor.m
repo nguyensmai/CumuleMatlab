@@ -1,4 +1,4 @@
-function     [predi, inputMask, outputMask] = generatePredictor(inputsSet, pred,dimO, outputMask, probInput)
+function     [predi, inputMask, outputMask] = generatePredictor(inputsSet, pred,dimO, outputMask,delay, probInput)
 %parameters
 HIDDEN_MAX = 6;
 
@@ -10,12 +10,12 @@ while ~uniqueBool
     inputsSetDim  = numel(inputsSet);
     inputSize =-1;
     while inputSize<1 || inputSize>inputsSetDim
-        inputSize = round(inputsSetDim/3*randn(1));
+        inputSize = round(3*randn(1));
     end
     %inputSize     = randi(inputsSetDim);
     inputMask =[];
     while (isempty(inputMask) || (size(unique(inputMask),2)~=inputSize) ) 
-        inputMask     = randsample(inputsSet,inputSize, true, probInput);
+        inputMask     = randsample(inputsSet,inputSize);
     end
     inputMask     = sort(inputMask);
     
@@ -32,7 +32,7 @@ while ~uniqueBool
     uniqueBool = 1;
     for iPred = 1:nPred
         if isequal([inputMask],[pred(iPred).maskInp])
-            if isequal([outputMask],[pred(iPred).maskOut])
+            if isequal([outputMask],[pred(iPred).maskOut]) && delay ==pred(iPred).delay
                 uniqueBool = 0;
                 break
             end
@@ -50,7 +50,7 @@ while hiddenSize2<1 || hiddenSize2>HIDDEN_MAX
     hiddenSize2 = max(2,round(HIDDEN_MAX*randn(1)));
 end
 
-predi         = FFN(inputMask, outputMask, hiddenSize1, hiddenSize2, inputsSet);
+predi         = FFN(inputMask, outputMask, hiddenSize1, hiddenSize2, inputsSet, delay);
 predi.probInput = probInput;
 predi.method  = ['generated'];
 end

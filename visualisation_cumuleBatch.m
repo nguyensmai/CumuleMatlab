@@ -11,7 +11,7 @@ title('error of all predictors and their mean error')
     figure(100)
     clf
     b =inputsMappingTo(iOut,:,:);
-    b=b(:);
+    b =b(:);
     b = reshape(b,numel(inputsSet),time-1)';
     plot(b)
 %     hold on; plot(b(:,1), 'LineWidth',4)

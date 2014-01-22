@@ -5,11 +5,11 @@
 %
 
 %% PARAMETERS
-nPred = 80;
+nPred = 17;
 dimM = 2;
-dimO = 8;
+dimO = 17;
 MEMORY_SIZE  = 500;
-BATCH_SIZE   = 100;
+BATCH_SIZE   = 1;
 
 %% 3: INITIALISATION
 rng('shuffle');
@@ -17,13 +17,13 @@ nbFixed = 0;
 env = Environment(dimO,dimM);
 inputsSet = 1:(dimO+dimM) ;
 % 7: initialise short-term memory
-sMemory = zeros(MEMORY_SIZE, dimO+dimM+1);
+sMemory = []; %zeros(MEMORY_SIZE, dimO+dimM+1);
 %save test_initialisation_gamma1
 time = 1;
 outArchive = OutputArchive(); %archive of the outputs of the good predictors
 errorLt = [];
 progressLt = [];
-copyLt=[];
+mutateLt=[];
 outputsLt ={};
 inputsMappingTo = [];
 nbArchOut = [];
@@ -41,69 +41,44 @@ mt   = env.randomAction;
 st   = 2*rand(1,dimO)-1;
 
 
-%td learning for the errors
-% global tdLearner
-% dimTD     = 10;
-% nbLayers  = 10;
-% nbTiles   = 7;
-% % -1 <-log10 error<10 (good)
-% % 0 (good)<-log10 progress < 6
-% tileMin   = [-ones(1,5)   , -ones(1,5)];
-% tileMax   = [11*ones(1,5), 7*ones(1,5)];
-% tileC     = TileCoding(dimTD, nbTiles*ones(1,dimTD),tileMin,tileMax,nbLayers);
-% load tdLearner % to load the fitness function
-% % to create a new fitness function
-% %tdLearner = TdLearning(nbTiles^dimTD*nbLayers, 0.1, 1, tileC);
-
 %% 9: while true do
 
+    
 while true
     
-    %8: LEARNING:
-    
-    %     10:	for iPred from 1 to nPred do
-    %     11:	Compute inDataiPred from sm
-    % inDataIpred = computeInput(predIpred, sm);
-    
-    %         12:	Run the predictor : predDataiPred ? prediPred(inDataiPred)
-    % predDataIpred = runPredictor(predIpred,inDataIpred);
-    
-    %     13:	end for
-    
-    for t=1:BATCH_SIZE
+    %LEARNING
+   
+     for t=1:BATCH_SIZE
         %     14:	Execute a motor command m chosen randomly
         mt   = env.randomAction;
-        smt = ([st  mt 1]+1)/2;
-        sMemory = [sMemory(2:end,:); smt];
+        smt = [st  mt 1];
+        sMemory = [sMemory; smt];
         
         %     15:	s(t + 1) ? read from sensorimotor data the new state.
         stp1  = executeAction(env, st, mt);
         
         %     16:	sm(t+1) ? read sensorimotor data
         st  = stp1;
-    end
-    
+     end
+ 
     %     17:	(pred, outPred, error, errMap) = TrainPredictors(pred, nPred, predData, sm)
     [pred, outPred, errorL] = TrainPredictorsBatch(pred, sMemory, BATCH_SIZE, dimO) ;
     errorLt = [errorLt; errorL'];
     progressL = [];
-   % progesssLt = [progressLt; progressL'];
     
     
     %% 18:	Neural patterns:
-    % 19:	pred = DeprecateBadPredictors(pred, ? error)
-    %[outArchive, pred] =  updateArchive(outArchive, pred);
-    [pred, nPred, mutated, outArchive,globalProbInput] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL,time,globalProbInput);
+    %[pred, nPred, mutated, outArchive,globalProbInput] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL,time,globalProbInput);
     
     
     %% post-processing
     if mutated ==1
-        copyLt =[copyLt; time];
+        mutateLt =[mutateLt; time];
     end
     
     outputsLt{time} = [];
     for iPred = 1:nPred
-        outputsLt{time}{iPred} = pred(iPred).maskOut;
+        outputsLt{time}{iPred} = pred(iPred).indOutDelay;
     end
     
     inputsLt{time} = [];
@@ -130,9 +105,9 @@ while true
     errorArchOutC = cell(nPred);
     for iPred=1:nPred
         if ~isempty(pred(iPred).sseRec)
-            errorPerOutC{pred(iPred).maskOut} =  [errorPerOutC{pred(iPred).maskOut}; pred(iPred).sseRec(end)];
+            errorPerOutC{pred(iPred).indOutDelay} =  [errorPerOutC{pred(iPred).indOutDelay}; errorL(iPred)];
             if pred(iPred).idFixed>1
-                errorArchOutC{pred(iPred).maskOut} =  [errorArchOutC{pred(iPred).maskOut}; pred(iPred).sseRec(end)];
+                errorArchOutC{pred(iPred).indOutDelay} =  [errorArchOutC{pred(iPred).indOutDelay}; errorL(iPred)];
             end
         end
     end
@@ -145,11 +120,10 @@ while true
     end
     
     
-    
-%     if mod(time,100)==0
-%         save(['test_progress_',num2str(floor(time/100))])
-%     end
     time = time + 1;
+     if mod(time,100)==0
+    save(['environment17',num2str(floor(time/100))])
+    end
     visualisation_cumuleBatch
 end
 
