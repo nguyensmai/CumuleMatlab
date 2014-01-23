@@ -98,40 +98,32 @@ classdef FFN
         
         
         function obj = pruning(obj)
-            thresPruning = 0.1;
-            max1 = max(abs([obj.w1(:);obj.w2(:);obj.w3(:)]));
-            obj.w1=(1-10^-6)*obj.w1;
-            obj.w2=(1-10^-6)*obj.w2;
-            obj.w3=(1-10^-6)*obj.w3;
-            in1= find(mean(abs(obj.w1(1:end-1,:)),2) >thresPruning);
-            if ~isempty(in1)
-                %                 if ~isempty(setdiff(1:obj.sizeInp-1,in1))
-                obj.w1=obj.w1([in1; end],:);
-                obj.dw1Last=obj.dw1Last([in1; end],:);
-                obj.maskPruned=[obj.maskPruned obj.maskInp(setdiff(1:obj.sizeInp-1,in1)) ];
-                %                 end
-                obj.maskInp=obj.maskInp(in1);
-                obj.sizeInp  = numel(obj.maskInp)+1;
+            thresPruning = 0.2;
+            max1 = max(abs([obj.w1(:);obj.w2(:)]));
+            obj.w1=(1-10^-5)*obj.w1;
+            obj.w2=(1-10^-5)*obj.w2;
+            if mean(sum(abs(obj.dw1Last),2))<0.1
+                in1= find(mean(abs(obj.w1(1:end-1,:)),2) >thresPruning*max1);
+                if ~isempty(in1)
+                    %                 if ~isempty(setdiff(1:obj.sizeInp-1,in1))
+                    obj.w1=obj.w1([in1; end],:);
+                    obj.dw1Last=obj.dw1Last([in1; end],:);
+                    obj.maskPruned=[obj.maskPruned obj.maskInp(setdiff(1:obj.sizeInp-1,in1)) ];
+                    %                 end
+                    obj.maskInp=obj.maskInp(in1);
+                    obj.sizeInp  = numel(obj.maskInp)+1;
+                end
             end
-            
-            hid1 = find(mean(abs(obj.w1),1) + mean(abs(obj.w2(1:end-1,:)),2)'>thresPruning);
-            if ~isempty(hid1)
-                obj.w1= obj.w1(:,hid1);
-                obj.w2= obj.w2([hid1 end],:);
-                obj.dw1Last= obj.dw1Last(:,hid1);
-                obj.dw2Last= obj.dw2Last([hid1 end],:);
-                obj.sizeHid1  = numel(hid1)+1;
+            if mean(sum(abs(obj.dw2Last),2))<0.1
+                hid1 = find(mean(abs(obj.w1),1) + mean(abs(obj.w2(1:end-1,:)),2)'>2*thresPruning*max1);
+                if ~isempty(hid1)
+                    obj.w1= obj.w1(:,hid1);
+                    obj.w2= obj.w2([hid1 end],:);
+                    obj.dw1Last= obj.dw1Last(:,hid1);
+                    obj.dw2Last= obj.dw2Last([hid1 end],:);
+                    obj.sizeHid1  = numel(hid1)+1;
+                end
             end
-            
-            hid2 = find(mean(abs(obj.w2),1) + mean(abs(obj.w3(1:end-1,:)),2)'>thresPruning);
-            if ~isempty(hid2)
-                obj.w2= obj.w2(:,hid2);
-                obj.w3= obj.w3([hid2 end],:);
-                obj.dw2Last= obj.dw2Last(:,hid2);
-                obj.dw3Last= obj.dw3Last([hid2 end],:);
-                obj.sizeHid2  = numel(hid2)+1;
-            end
-            
         end
         
         
@@ -196,7 +188,7 @@ classdef FFN
     methods(Static=true)
         function testBackprop()
             %constant function
-            pred         = FFN([1], [1], 3, 3, [1], 1);
+            pred         = FFN([1], [1], 3, [1], 1);
             for i=1:10000
                 [sse, predictedOut, pred, deltas_out] = bkprop(pred,[rand() 1],1);
             end
@@ -206,7 +198,7 @@ classdef FFN
             
             
             %linear function
-            pred         = FFN([1], [1], 10, 10, [1], 1);
+            pred         = FFN([1], [1], 10, [1], 1);
             for i=1:10000
                 x= rand();
                 [sse, predictedOut, pred, deltas_out] = bkprop(pred,[x 1],x);
@@ -217,7 +209,7 @@ classdef FFN
             
             
             % 2D inputs
-            pred         = FFN([1 2], [1], 10, 10, [1 2], 1);
+            pred         = FFN([1 2], [1], 10, [1 2], 1);
             input = [1  0 1; ...
                 0  1 1; ...
                 1  1 1; ...
@@ -235,7 +227,7 @@ classdef FFN
             test_error= [test_error; test];
             plot(test_error)
             end
-            
+            predictedOut=[]
             [predictedOut(1), ~]= predict(pred,[1  0 1])  %expects 0.5
             [predictedOut(2), ~]= predict(pred,[0  1 1])  %expects 0.5
             [predictedOut(3), ~]= predict(pred,[1  1 1])  %expects 1
@@ -247,7 +239,7 @@ classdef FFN
          function testBatchBackprop()
            
             % 2D inputs
-            pred         = FFN([1 2], [1], 10, 10, [1 2], 1);
+            pred         = FFN([1 2], [1], 10, [1 2], 1);
             input = [1  0 1; ...
                 0  1 1; ...
                 1  1 1; ...
@@ -264,19 +256,19 @@ classdef FFN
                 
                 test = errorInPrediction(pred,input, target);
                 test_error= [test_error; test];
-                plot(test_error)
+                semilogy(test_error)
             end
-            
-            [predictedOut(1), ~]= predict(pred,[1  0 1])  %expects 0.5
-            [predictedOut(2), ~]= predict(pred,[0  1 1])  %expects 0.5
-            [predictedOut(3), ~]= predict(pred,[1  1 1])  %expects 1
-            [predictedOut(4), ~]= predict(pred,[0  0 1])  %expects 0
-            [predictedOut(5), ~]= predict(pred,[0.5 0.5 1])%expects 0.5
-            figure; plot([predictedOut;target']')
+            predictedOut =[]
+            [predictedOut(1), ~]= predict(pred,[1  0 1]);  %expects 0.5
+            [predictedOut(2), ~]= predict(pred,[0  1 1]);  %expects 0.5
+            [predictedOut(3), ~]= predict(pred,[1  1 1]);  %expects 1
+            [predictedOut(4), ~]= predict(pred,[0  0 1]);  %expects 0
+            [predictedOut(5), ~]= predict(pred,[0.5 0.5 1]);%expects 0.5
+            figure; plot([predictedOut;target(1:5)']')
         end
         
         function testPruning()
-            pred         = FFN([1 2 3 4], [1], 3, 3, [1 2 3 4], 1);
+            pred         = FFN([1 2 3 4], [1], 3, [1 2 3 4], 1);
             inpTest = [ [1 1 1 1 ];...
                 [0 1 1 1 ];...
                 [0.5 1 1 1];...
@@ -292,31 +284,38 @@ classdef FFN
                 [1 1 0 0 ];...
                 [0 1 0 0 ];...
                 [0.5 0 1 0];];
-            targetTest = [
+            inpTest = [inpTest ones(size(inpTest,1),1)];
+            targetTest = inpTest(:,1);
+            test_error=[];
             for i=1:10000
-                x= rand();
-                inp = [x rand() rand() rand()];
-                [sse, predictedOut, pred, deltas_out] = bkprop(pred,[inp(pred.maskInp) 1],x);
+                for j=1:100
+                    x(j,1)= rand();
+                end
+                inp = [x rand(100,3)];
+                [sse, predictedOut, pred, deltas_out] = bkprop(pred,[inp(:,pred.maskInp) ones(100,1)],x);
                 pred = pruning(pred);
-                test = errorInPrediction(pred,inpTest, target);
+                test = errorInPrediction(pred,inpTest(:,[pred.maskInp end]), targetTest);
                 test_error= [test_error; test];
-                plot(test_error)
+                semilogy(test_error)
+                %plot(test_error)
             end
 
-            [predictedOut, ~]= predict(pred,[inp(1,pred.maskInp) 1])  %expects 1
-            [predictedOut, ~]= predict(pred,[inp(2,pred.maskInp) 1])  %expects 0
-            [predictedOut, ~]= predict(pred,[inp(3,pred.maskInp) 1])  %expects 0.5
-            [predictedOut, ~]= predict(pred,[inp(4,pred.maskInp) 1])  %expects 1
-            [predictedOut, ~]= predict(pred,[inp(5,pred.maskInp) 1])  %expects 0
-            [predictedOut, ~]= predict(pred,[inp(6,pred.maskInp) 1])  %expects 0.5
-            [predictedOut, ~]= predict(pred,[inp(7,pred.maskInp) 1])  %expects 1
-            [predictedOut, ~]= predict(pred,[inp(8,pred.maskInp) 1])  %expects 0
-            [predictedOut, ~]= predict(pred,[inp(9,pred.maskInp) 1])  %expects 0.5
+            predictedOut = [];
+            [predictedOut(1), ~]= predict(pred,[inpTest(1,pred.maskInp) 1])  %expects 1
+            [predictedOut(2), ~]= predict(pred,[inpTest(2,pred.maskInp) 1])  %expects 0
+            [predictedOut(3), ~]= predict(pred,[inpTest(3,pred.maskInp) 1])  %expects 0.5
+            [predictedOut(4), ~]= predict(pred,[inpTest(4,pred.maskInp) 1])  %expects 1
+            [predictedOut(5), ~]= predict(pred,[inpTest(5,pred.maskInp) 1])  %expects 0
+            [predictedOut(6), ~]= predict(pred,[inpTest(6,pred.maskInp) 1])  %expects 0.5
+            [predictedOut(7), ~]= predict(pred,[inpTest(7,pred.maskInp) 1])  %expects 1
+            [predictedOut(8), ~]= predict(pred,[inpTest(8,pred.maskInp) 1])  %expects 0
+            [predictedOut(9), ~]= predict(pred,[inpTest(9,pred.maskInp) 1])  %expects 0.5
+            figure; plot([predictedOut;targetTest([1:9])']')
+
             
             
-            
-            pred         = FFN([1 2 3 4], [1], 10, 10, [1 2 3 4], 1);
-            inp = [ [1 1 1 1 ];...
+            pred         = FFN([1:13], [1], 10, [1:13], 1);
+            inpTest = [ [1 1 1 1 ];...
                 [0 1 1 1 ];...
                 [0.5 1 1 1];...
                 [1 0 1 1 ];...
@@ -325,33 +324,42 @@ classdef FFN
                 [1 1 0 1 ];...
                 [0 1 0 1 ];...
                 [0.5 1 0 1];...
-%                 [1 1 1 0 ];...
-%                 [0 1 1 0 ];...
-%                 [0.5 1 1 0];...
-%                 [1 1 0 0 ];...
-%                 [0 1 0 0 ];...
-%                 [0.5 0 1 0];...
+                [1 1 1 0 ];...
+                [0 1 1 0 ];...
+                [0.5 1 1 0];...
+                [1 1 0 0 ];...
+                [0 1 0 0 ];...
+                [0.5 0 1 0];...
                 ];
-            target= [1;0.5;0.75;1;0;0.25;0.5;0;0.25];
-            for i=1:1000
-                x= rand();
-                y= rand();
-                inp = [x rand() y rand()];
-                [sse, predictedOut, pred, deltas_out] = bkprop(pred,[inp(pred.maskInp) 1],...
+            inpTest = [inpTest rand(size(inpTest,1),9) ones(size(inpTest,1),1)];
+            targetTest= mean(inpTest(:,[1 3]),2);
+            test_error=[];
+            batch = 100;
+            for i=1:30000
+                x= rand(batch,1);
+                y= rand(batch,1);
+                inp = [x rand(batch,1) y rand(batch,10)];
+                [sse, predictedOut, pred, deltas_out] = bkprop(pred,[inp(:,pred.maskInp) ones(batch,1)],...
                     (x+y)/2);
-                % pred = pruning(pred);
+                %pred = pruning(pred);
+                test = errorInPrediction(pred,inpTest(:,[pred.maskInp end]), targetTest);
+                test_error= [test_error; test];
+                semilogy(test_error)
+                %plot(test_error)
             end
             
-            [predictedOut, ~]= predict(pred,[inp(1,pred.maskInp) 1])  %expects 1
-            [predictedOut, ~]= predict(pred,[inp(2,pred.maskInp) 1])  %expects 0.5
-            [predictedOut, ~]= predict(pred,[inp(3,pred.maskInp) 1])  %expects 0.75
-            [predictedOut, ~]= predict(pred,[inp(4,pred.maskInp) 1])  %expects 1
-            [predictedOut, ~]= predict(pred,[inp(5,pred.maskInp) 1])  %expects 0
-            [predictedOut, ~]= predict(pred,[inp(6,pred.maskInp) 1])  %expects 0.25
-            [predictedOut, ~]= predict(pred,[inp(7,pred.maskInp) 1])  %expects 0.5
-            [predictedOut, ~]= predict(pred,[inp(8,pred.maskInp) 1])  %expects 0
-            [predictedOut, ~]= predict(pred,[inp(9,pred.maskInp) 1])  %expects 0.25
-            
+            predictedOut=[];
+            [predictedOut(1), ~]= predict(pred,[inpTest(1,pred.maskInp) 1])  %expects 1
+            [predictedOut(2), ~]= predict(pred,[inpTest(2,pred.maskInp) 1])  %expects 0.5
+            [predictedOut(3), ~]= predict(pred,[inpTest(3,pred.maskInp) 1])  %expects 0.75
+            [predictedOut(4), ~]= predict(pred,[inpTest(4,pred.maskInp) 1])  %expects 1
+            [predictedOut(5), ~]= predict(pred,[inpTest(5,pred.maskInp) 1])  %expects 0
+            [predictedOut(6), ~]= predict(pred,[inpTest(6,pred.maskInp) 1])  %expects 0.25
+            [predictedOut(7), ~]= predict(pred,[inpTest(7,pred.maskInp) 1])  %expects 0.5
+            [predictedOut(8), ~]= predict(pred,[inpTest(8,pred.maskInp) 1])  %expects 0
+            [predictedOut(9), ~]= predict(pred,[inpTest(9,pred.maskInp) 1])  %expects 0.25
+            figure; plot([predictedOut;targetTest([1:9])']')
+  
         end
     end %end methods
     
