@@ -31,9 +31,14 @@ for iPred = 1:nPred
             desired_out2        = memory(end-2*batch_size:end-batch_size, [pred(iPred).maskOut]);
             [sse pred_out pred(iPred)] = ...
                 bkprop(pred(iPred), data_in2, desired_out2);
+            %pred(iPred) = pruning(pred(iPred));
             error2(iPred, iEpoch)   =  sse;
         end
     end
+    %TEST: to compare with no pruning case
+%     if iPred<51 || iPred>100
+%         pred(iPred) = pruning(pred(iPred));
+%     end
 end
 
 meanError = mean(error,2);

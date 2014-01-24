@@ -43,7 +43,7 @@ classdef FFN
             obj.eta   = 0.01;        % Learning rate. Note: eta = 1 is very large.
             obj.alpha = 0.1;    % Momentum term
             % Add a column of 1's to patterns to make a bias node
-            obj.sizeInp  = numel(inputsSet)+1; %numel(inputMask)+1;
+            obj.sizeInp  = numel(inputMask)+1;
             obj.sizeHid1  = hiddenSize1;
             obj.sizeOut  = numel(outputMask);
             obj.w1       = 0.5*(1-2*rand(obj.sizeInp,obj.sizeHid1-1));
@@ -52,7 +52,7 @@ classdef FFN
             obj.dw2Last   = zeros(size(obj.w2));
             obj.sseRec    = [];
             obj.meanError = 10;
-            obj.maskInp   = inputsSet;%inputMask;
+            obj.maskInp   = inputMask;
             obj.maskOut   = outputMask;
             obj.maskPruned   = [];
             obj.idFixed   = -1;
@@ -71,10 +71,14 @@ classdef FFN
         
       
         
-        function output_error = errorInPrediction(obj,input, target)
+        function output_error = errorInPrediction(obj,input, target, plot)
             [predictedOut ]= predict(obj,input);
             error_vect   = target - predictedOut;   % Error matrix
             output_error = trace(error_vect'*error_vect)/obj.sizeOut;  % Sum sqr error, matrix style
+            if exist('plot') && plot==1 &&  obj.sizeOut==1
+               figure
+               plot([target(:)';predictedOut(:)'])
+            end
         end
         
         function [sse, predictedOut, obj, output_error] = bkprop(obj,input,target)
@@ -98,7 +102,7 @@ classdef FFN
         
         
         function obj = pruning(obj)
-            thresPruning = 0.2;
+            thresPruning = 0.1;
             max1 = max(abs([obj.w1(:);obj.w2(:)]));
             obj.w1=(1-10^-5)*obj.w1;
             obj.w2=(1-10^-5)*obj.w2;
