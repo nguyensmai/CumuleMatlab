@@ -29,7 +29,7 @@ end
  pred(5) = FFN([51 52], [5], 20, inputsSet,1);  % good for env4 [s1 m1] -> s1
  pred(6) = FFN([51], [6], 20, inputsSet,1);  % good for env4 [s1 m1] -> s1
  pred(7) = FFN([1 2], [7], 3, inputsSet,1);  % good for env4 [s1 m1] -> s1
- pred(8) = FFN([1 ], [8], 10000, inputsSet,1);  % good for env4 [s1 m1] -> s1
+ pred(8) = FFN([1 ], [8], 100, inputsSet,1);  % good for env4 [s1 m1] -> s1
  pred(9) = FFN([51], [9], 5, inputsSet,1);  % good for env4 [s1 m1] -> s1
  pred(10) = FFN([51 52], [10], 5, inputsSet,1);  % good for env4 [s1 m1] -> s1
  pred(11) = FFN([6], [11], 20, inputsSet,1);  % good for env4 [s1 m1] -> s1
