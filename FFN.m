@@ -11,12 +11,13 @@ classdef FFN
         eta      % double. learning rate
         alpha    % double . momentum term
         sizeInp  % integer. size of the input to the neural network
-        sizeHid1 % integer. size of the 1st hidden layer
+        nbHid    % integer. number of hidden layers
+        sizeHid % list of integer. size of the 1st hidden layer
         sizeOut  % integer. size of the output of the neural network
-        w1       % matrix. weights vector (input -> 1st hiddent layer)
-        w2       % matrix. weights vector (1st -> 2nd hiddent layer)
-        dw1Last  % matrix. last change to the weights (used to update the momentum records)
-        dw2Last
+        w       % matrix. weights vector (input -> 1st hiddent layer)
+        wOut       % matrix. weights vector (1st -> 2nd hiddent layer)
+        dwLast  % matrix. last change to the weights (used to update the momentum records)
+        dwOutLast
         sseRec    % vector. history of the errors
         meanError % double. most recent mean error value
         progress  % double. omost recent progress value
@@ -29,6 +30,17 @@ classdef FFN
         probInput % indicates the probabilities that the output depends on the sensorimotor variables
         delay     % prediction for time t+delay
         indOutDelay
+        
+        %{
+        structure of the ffn
+        input (sizeInput) --- w{1} (sizeInp x (sizeHid(1)-1) )
+        --> winp_into_hid{1}  --- transfer function -->
+        hid_act{1} --- w{2} (sizeHid(1)x(sizeHid(2)-1)) --> winp_into_hid{2}
+        ...
+        hid_act{nbHid-1} --- w{nbHid} (sizeHid(nbHid-1)x(sizeHid(nbHid)-1))
+        --> winp_into_hid{nbHid} ---transfer function -->
+        hid_act{nbHid} --- wOut (sizeHid(nbHid)x(sizeOut)) --> predicted_out
+        %}
     end
     
     
@@ -44,12 +56,17 @@ classdef FFN
             obj.alpha = 0.1;    % Momentum term
             % Add a column of 1's to patterns to make a bias node
             obj.sizeInp  = numel(inputMask)+1;
-            obj.sizeHid1  = hiddenSize1;
+            obj.sizeHid  = hiddenSize1;
+            obj.nbHid    = numel(obj.sizeHid);
             obj.sizeOut  = numel(outputMask);
-            obj.w1       = 0.5*(1-2*rand(obj.sizeInp,obj.sizeHid1-1));
-            obj.w2       = 0.5*(1-2*rand(obj.sizeHid1,obj.sizeOut));
-            obj.dw1Last   = zeros(size(obj.w1));
-            obj.dw2Last   = zeros(size(obj.w2));
+            obj.w{1}       = 0.5*(1-2*rand(obj.sizeInp,obj.sizeHid(1)-1));
+            obj.dwLast{1}   = zeros(size(obj.w{1}));
+            for iHid =2:obj.nbHid
+                obj.w{iHid}       = 0.5*(1-2*rand(obj.sizeHid(iHid-1),obj.sizeHid(iHid)-1));
+                obj.dwLast{iHid}   = zeros(size(obj.w{iHid}));
+            end
+            obj.wOut       = 0.5*(1-2*rand(obj.sizeHid(end),obj.sizeOut));
+            obj.dwOutLast   = zeros(size(obj.wOut));
             obj.sseRec    = [];
             obj.meanError = 10;
             obj.maskInp   = inputMask;
@@ -63,39 +80,77 @@ classdef FFN
         end %end function constructor
         
         function [predictedOut, hidWithBias]= predict(obj,input)
-            winp_into_hid = input * obj.w1;                       % Pass patterns through weights
-            hid_act = 1./(1+exp( - winp_into_hid));               % Sigmoid of weighted input
-            hidWithBias = [ hid_act ones(size(hid_act,1),1) ];    % Add bias node
-            predictedOut = hidWithBias * obj.w2;                % linear transfer to output
+            %initalise
+            winp_into_hid = cell(obj.nbHid);
+            hid_act       = cell(obj.nbHid);
+            %feeed forward input -> hidden1
+            winp_into_hid{1} = input * obj.w{1};                       % Pass patterns through weights
+            hid_act{1} = 1./(1+exp( - winp_into_hid{1}));               % Sigmoid of weighted input
+            hidWithBias{1} = [ hid_act{1} ones(size(hid_act{1},1),1) ];    % Add bias node
+            for iHid =2:obj.nbHid
+                winp_into_hid{iHid} = hidWithBias{iHid-1} * obj.w{iHid};                       % Pass patterns through weights
+                hid_act{iHid} = 1./(1+exp( - winp_into_hid{iHid}));               % Sigmoid of weighted input
+                hidWithBias{iHid} = [ hid_act{iHid} ones(size(hid_act{iHid},1),1) ];    % Add bias node
+            end
+            predictedOut = hidWithBias{end} * obj.wOut;                % linear transfer to output
         end
         
       
-        
-        function output_error = errorInPrediction(obj,input, target, plot)
+        % output_error is the matrix of square error for each dim and data 
+        function output_error = errorInPrediction(obj,input, target, plotB)
             [predictedOut ]= predict(obj,input);
             error_vect   = target - predictedOut;   % Error matrix
             output_error = trace(error_vect'*error_vect)/obj.sizeOut;  % Sum sqr error, matrix style
-            if exist('plot') && plot==1 &&  obj.sizeOut==1
-               figure
-               plot([target(:)';predictedOut(:)'])
+            %output_error= output_error.*output_error;
+            if exist('plotB','var')
+                if plotB==1
+                    if  obj.sizeOut==1
+                        plot([target(:)';predictedOut(:)'])
+                    else
+                        figure
+                        for iOut =1:obj.sizeOut
+                            subplot(1,obj.sizeOut,iOut)
+                            plot([target(:,iOut);predictedOut(:,iOut)])
+                        end
+                    end
+                end
             end
         end
         
         function [sse, predictedOut, obj, output_error] = bkprop(obj,input,target)
+            %{
+            backprop structure
+            deltas_out --- wOut --> 
+            deltas_hid{nbHid} --- w{nbHid} -->
+            deltas_hid{nbHid-1} --- w{nbHid-1} --> ...
+            deltas_hid{2} --- w{2} --> deltas_hid{1} --- w{1} --> input
+            %}
             [predictedOut, hidWithBias]= predict(obj,input);
             output_error = target - predictedOut; % Error matrix
-            sse = trace(output_error'*output_error)/obj.sizeOut;  % Sum sqr error, matrix style
+            sse = trace(output_error'*output_error)/(obj.sizeOut * size(input,1));  % Sum sqr error, matrix style
             obj.sseRec = [obj.sseRec sse];                        % Record keeping
             deltas_out = output_error;                            % linear transfer output
             % delta=dE/do * do/dnet
-            deltas_hid = deltas_out*obj.w2' .* hidWithBias .* (1-hidWithBias); %size nbOut x sizeHid 
-            deltas_hid(:,size(deltas_hid,2)) = [];
+            deltas_hid{obj.nbHid} = deltas_out*obj.wOut' .* hidWithBias{obj.nbHid} .* (1-hidWithBias{obj.nbHid}); %size nbOut x sizeHid
+            deltas_hid{obj.nbHid}(:,size(deltas_hid{obj.nbHid},2)) = [];
+            for iHid =obj.nbHid-1:-1:1
+                deltas_hid{iHid} = deltas_hid{iHid+1}*obj.w{iHid+1}' .* hidWithBias{iHid} .* (1-hidWithBias{iHid}); %size nbOut x sizeHid
+                deltas_hid{iHid}(:,size(deltas_hid{iHid},2)) = [];
+            end
+            
             % Take out error signals for bias node
-            dw1 = obj.eta * input' * deltas_hid + obj.alpha * obj.dw1Last;     %size sizeInp x sizeHid 
+            dw{1} = obj.eta * input' * deltas_hid{1} + obj.alpha * obj.dwLast{1};     %size sizeInp x sizeHid
+            obj.w{1} = obj.w{1} + dw{1};
+            obj.dwLast{1} = dw{1};
+            for iHid =2:obj.nbHid
+                dw{iHid} = obj.eta * hidWithBias{iHid-1}' * deltas_hid{iHid} + obj.alpha * obj.dwLast{iHid};     %size sizeInp x sizeHid
+                obj.w{iHid} = obj.w{iHid} + dw{iHid};
+                obj.dwLast{iHid} = dw{iHid};
+            end
             % The key backprop step, in matrix form
-            dw2 = obj.eta * hidWithBias' * deltas_out + obj.alpha * obj.dw2Last;
-            obj.w1 = obj.w1 + dw1; obj.w2 = obj.w2 + dw2;           % Weight update
-            obj.dw1Last = dw1; obj.dw2Last = dw2;         % Update momentum records
+            dwOut = obj.eta * hidWithBias{end}' * deltas_out + obj.alpha * obj.dwOutLast;
+             obj.wOut = obj.wOut + dwOut;           % Weight update
+             obj.dwOutLast = dwOut;         % Update momentum records
         end
         
          
@@ -103,29 +158,29 @@ classdef FFN
         
         function obj = pruning(obj)
             thresPruning = 0.1;
-            max1 = max(abs([obj.w1(:);obj.w2(:)]));
-            obj.w1=(1-10^-5)*obj.w1;
-            obj.w2=(1-10^-5)*obj.w2;
-            if mean(sum(abs(obj.dw1Last),2))<0.1
-                in1= find(mean(abs(obj.w1(1:end-1,:)),2) >thresPruning*max1);
+            max1 = max(abs([obj.w(:);obj.wOut(:)]));
+            obj.w=(1-10^-5)*obj.w;
+            obj.wOut=(1-10^-5)*obj.wOut;
+            if mean(sum(abs(obj.dwLast),2))<0.1
+                in1= find(mean(abs(obj.w(1:end-1,:)),2) >thresPruning*max1);
                 if ~isempty(in1)
                     %                 if ~isempty(setdiff(1:obj.sizeInp-1,in1))
-                    obj.w1=obj.w1([in1; end],:);
-                    obj.dw1Last=obj.dw1Last([in1; end],:);
+                    obj.w=obj.w([in1; end],:);
+                    obj.dwLast=obj.dwLast([in1; end],:);
                     obj.maskPruned=[obj.maskPruned obj.maskInp(setdiff(1:obj.sizeInp-1,in1)) ];
                     %                 end
                     obj.maskInp=obj.maskInp(in1);
                     obj.sizeInp  = numel(obj.maskInp)+1;
                 end
             end
-            if mean(sum(abs(obj.dw2Last),2))<0.1
-                hid1 = find(mean(abs(obj.w1),1) + mean(abs(obj.w2(1:end-1,:)),2)'>2*thresPruning*max1);
+            if mean(sum(abs(obj.dwOutLast),2))<0.1
+                hid1 = find(mean(abs(obj.w),1) + mean(abs(obj.wOut(1:end-1,:)),2)'>2*thresPruning*max1);
                 if ~isempty(hid1)
-                    obj.w1= obj.w1(:,hid1);
-                    obj.w2= obj.w2([hid1 end],:);
-                    obj.dw1Last= obj.dw1Last(:,hid1);
-                    obj.dw2Last= obj.dw2Last([hid1 end],:);
-                    obj.sizeHid1  = numel(hid1)+1;
+                    obj.w= obj.w(:,hid1);
+                    obj.wOut= obj.wOut([hid1 end],:);
+                    obj.dwLast= obj.dwLast(:,hid1);
+                    obj.dwOutLast= obj.dwOutLast([hid1 end],:);
+                    obj.sizeHid  = numel(hid1)+1;
                 end
             end
         end
@@ -238,6 +293,63 @@ classdef FFN
             [predictedOut(4), ~]= predict(pred,[0  0 1])  %expects 0
             [predictedOut(5), ~]= predict(pred,[0.5 0.5 1])%expects 0.5
             figure; plot([predictedOut;target']')
+            
+            
+            % 2D inputs, 2D outputs
+            pred         = FFN([1 2], [1 2], 10, [1 2], 1);
+            input = [1  0 1; ...
+                0  1 1; ...
+                1  1 1; ...
+                0  0 1; ...
+                0.5 0.5 1]; 
+            target = input(:,1:2)/2;
+            test_error = [];
+            while true
+            for i=1:100
+                x= rand();
+                y= rand();
+                [sse, predictedOut, pred, deltas_out] = bkprop(pred,[x y 1],[x y]/2);
+            end
+            test = errorInPrediction(pred,input, target);
+            test_error= [test_error; test];
+            plot(test_error)
+            end
+            predictedOut=[]
+            [predictedOut(1,:), ~]= predict(pred,[1  0 1])  %expects 0.5
+            [predictedOut(2,:), ~]= predict(pred,[0  1 1])  %expects 0.5
+            [predictedOut(3,:), ~]= predict(pred,[1  1 1])  %expects 1
+            [predictedOut(4,:), ~]= predict(pred,[0  0 1])  %expects 0
+            [predictedOut(5,:), ~]= predict(pred,[0.5 0.5 1])%expects 0.5
+            figure; plot([predictedOut;target']')
+            
+            
+ 
+            % 2 layer- network, 2D inputs
+            pred         = FFN([1 2], [1], [5 5], [1 2], 1);
+            input = [1  0 1; ...
+                0  1 1; ...
+                1  1 1; ...
+                0  0 1; ...
+                0.5 0.5 1]; 
+            target = [0.5; 0.5; 1; 0; 0.5];
+            test_error = [];
+            while true
+            for i=1:100
+                x= rand();
+                y= rand();
+                [sse, predictedOut, pred, deltas_out] = bkprop(pred,[x y 1],(x+y)/2);
+            end
+            test = errorInPrediction(pred,input, target);
+            test_error= [test_error; test];
+            plot(test_error)
+            end
+            predictedOut=[]
+            [predictedOut(1), ~]= predict(pred,[1  0 1])  %expects 0.5
+            [predictedOut(2), ~]= predict(pred,[0  1 1])  %expects 0.5
+            [predictedOut(3), ~]= predict(pred,[1  1 1])  %expects 1
+            [predictedOut(4), ~]= predict(pred,[0  0 1])  %expects 0
+            [predictedOut(5), ~]= predict(pred,[0.5 0.5 1])%expects 0.5
+            figure; plot([predictedOut;target']')
         end
 
          function testBatchBackprop()
@@ -264,6 +376,42 @@ classdef FFN
             end
             predictedOut =[]
             [predictedOut(1), ~]= predict(pred,[1  0 1]);  %expects 0.5
+            [predictedOut(2), ~]= predict(pred,[0  1 1]);  %expects 0.5
+            [predictedOut(3), ~]= predict(pred,[1  1 1]);  %expects 1
+            [predictedOut(4), ~]= predict(pred,[0  0 1]);  %expects 0
+            [predictedOut(5), ~]= predict(pred,[0.5 0.5 1]);%expects 0.5
+            figure; plot([predictedOut;target(1:5)']')
+            
+            
+            % 2D inputs, 3D outputs
+            pred         = FFN([1 2], [1 2 3], 10, [1 2 3], 1);
+            input = [1  0 1; ...
+                0  1 1; ...
+                1  1 1; ...
+                0  0 1; ...
+                0.5 0.5 1]; 
+            target = [input(:,1:2) mean(input(:,1:2),2)];
+            test_error = [];
+            errorLt = [];
+            while true
+                for i=1:100
+                    x(i,1)= rand();
+                    y(i,1)= rand();
+                end
+                [sse, predictedOut, pred, deltas_out] = bkprop(pred,[x y ones(100,1)],[x y (x+y)/2]);
+                
+                test = errorInPrediction(pred,input, target);
+                test_error= [test_error; test];
+                errorLt = [errorLt; deltas_out.*deltas_out];
+                semilogy(test_error)
+            end
+            figure
+            for i=1:3
+                subplot(1,3,i)
+                semilogy(smooth(abs(errorLt(:,i)),1000))
+            end
+            predictedOut =[]
+            [predictedOut(1,:), ~]= predict(pred,[1  0 1]);  %expects 0.5
             [predictedOut(2), ~]= predict(pred,[0  1 1]);  %expects 0.5
             [predictedOut(3), ~]= predict(pred,[1  1 1]);  %expects 1
             [predictedOut(4), ~]= predict(pred,[0  0 1]);  %expects 0
