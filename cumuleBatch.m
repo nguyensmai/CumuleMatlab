@@ -9,7 +9,7 @@ nPred = 3*50;
 dimM = 2;
 dimO = 50;
 MEMORY_SIZE  = 500;
-BATCH_SIZE   = 1;
+BATCH_SIZE   = 100;
 
 %% 3: INITIALISATION
 rng('shuffle');

@@ -107,7 +107,6 @@ classdef FFN
                     if  obj.sizeOut==1
                         plot([target(:)';predictedOut(:)'])
                     else
-                        figure
                         for iOut =1:obj.sizeOut
                             subplot(1,obj.sizeOut,iOut)
                             plot([target(:,iOut);predictedOut(:,iOut)])
@@ -356,7 +355,7 @@ classdef FFN
            
             % 2D inputs
             pred         = FFN([1 2], [1], 10, [1 2], 1);
-            input = [1  0 1; ...
+            inputTest = [1  0 1; ...
                 0  1 1; ...
                 1  1 1; ...
                 0  0 1; ...
@@ -370,7 +369,7 @@ classdef FFN
                 end
                 [sse, predictedOut, pred, deltas_out] = bkprop(pred,[x y ones(100,1)],(x+y)/2);
                 
-                test = errorInPrediction(pred,input, target);
+                test = errorInPrediction(pred,inputTest, target);
                 test_error= [test_error; test];
                 semilogy(test_error)
             end
@@ -385,12 +384,12 @@ classdef FFN
             
             % 2D inputs, 3D outputs
             pred         = FFN([1 2], [1 2 3], 10, [1 2 3], 1);
-            input = [1  0 1; ...
+            inputTest = [1  0 1; ...
                 0  1 1; ...
                 1  1 1; ...
                 0  0 1; ...
                 0.5 0.5 1]; 
-            target = [input(:,1:2) mean(input(:,1:2),2)];
+            target = [inputTest(:,1:2) mean(inputTest(:,1:2),2)];
             test_error = [];
             errorLt = [];
             while true
@@ -400,7 +399,7 @@ classdef FFN
                 end
                 [sse, predictedOut, pred, deltas_out] = bkprop(pred,[x y ones(100,1)],[x y (x+y)/2]);
                 
-                test = errorInPrediction(pred,input, target);
+                test = errorInPrediction(pred,inputTest, target);
                 test_error= [test_error; test];
                 errorLt = [errorLt; deltas_out.*deltas_out];
                 semilogy(test_error)
@@ -417,6 +416,60 @@ classdef FFN
             [predictedOut(4), ~]= predict(pred,[0  0 1]);  %expects 0
             [predictedOut(5), ~]= predict(pred,[0.5 0.5 1]);%expects 0.5
             figure; plot([predictedOut;target(1:5)']')
+            
+            
+            
+             % 2 layer- network, 2D inputs
+            pred         = FFN([1 2], [1], [5 5], [1 2], 1);
+            input = [1  0 1; ...
+                0  1 1; ...
+                1  1 1; ...
+                0  0 1; ...
+                0.5 0.5 1]; 
+            target = [0.5; 0.5; 1; 0; 0.5];
+            test_error = [];
+            while true
+            for i=1:100
+                x(i,:)= rand();
+                y(i,:)= rand();
+            end
+            [sse, predictedOut, pred, deltas_out] = bkprop(pred,[x y ones(100,1)],(x+y)/2);
+            test = errorInPrediction(pred,input, target);
+            test_error= [test_error; test];
+            plot(test_error)
+            end
+            predictedOut=[]
+            [predictedOut(1), ~]= predict(pred,[1  0 1])  %expects 0.5
+            [predictedOut(2), ~]= predict(pred,[0  1 1])  %expects 0.5
+            [predictedOut(3), ~]= predict(pred,[1  1 1])  %expects 1
+            [predictedOut(4), ~]= predict(pred,[0  0 1])  %expects 0
+            [predictedOut(5), ~]= predict(pred,[0.5 0.5 1])%expects 0.5
+            figure; plot([predictedOut;target']')
+            
+            
+            
+             % 1D input, 1D output, 2 layers 
+            pred         = FFN([1], [1], [5 5], [1], 1);
+            inputTest = [sort(rand(10,1)) ones(10,1)];
+            target = cos(3*pi*inputTest(:,1));
+            test_error = [];
+            while true
+                x= rand(100,1);
+                [sse, predictedOut, pred, deltas_out] = bkprop(pred,[x ones(100,1)],cos(x*3*pi));
+                
+                test = errorInPrediction(pred,inputTest, target);
+                test_error= [test_error; test];
+                semilogy(test_error)
+            end
+            predictedOut =[]
+            [predictedOut(1), ~]= predict(pred,inputTest(1,:));  %expects 0.5
+            [predictedOut(2), ~]= predict(pred,inputTest(2,:));  %expects 0.5
+            [predictedOut(3), ~]= predict(pred,inputTest(3,:));  %expects 1
+            [predictedOut(4), ~]= predict(pred,inputTest(4,:));  %expects 0
+            [predictedOut(5), ~]= predict(pred,inputTest(5,:));%expects 0.5
+            figure; plot([predictedOut;target(1:5)']')
+            
+            
         end
         
         function testPruning()

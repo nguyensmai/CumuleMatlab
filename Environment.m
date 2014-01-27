@@ -20,7 +20,7 @@ classdef Environment < handle
         end
         
         function mt = randomAction(obj)
-            mt = 2*rand(1,obj.dimM)-1;
+            mt = rand(1,obj.dimM);
         end
 
         

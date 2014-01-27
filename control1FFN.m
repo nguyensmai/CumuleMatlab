@@ -79,8 +79,8 @@ while true
         %desired_out2        =(desired_out2+1)/2;
         
         for iEpoch=1:NB_EPOCHS
-            data_in2            = sMemory(end-2*BATCH_SIZE-1:end-BATCH_SIZE-1, [pred(iPred).maskInp end]);
-            desired_out2        = sMemory(end-2*BATCH_SIZE:end-BATCH_SIZE, [pred(iPred).maskOut]);
+            data_in2            = memory(end-2*batch_size-pred(iPred).delay+1:end-batch_size-pred(iPred).delay, [pred(iPred).maskInp end]);
+            desired_out2        = memory(end-2*batch_size+1:end-batch_size, [pred(iPred).maskOut]);
             [sse pred_out pred(iPred)] = ...
                 bkprop(pred(iPred), data_in2, desired_out2);
             %pred(iPred) = pruning(pred(iPred));
@@ -106,6 +106,7 @@ for i=1:5
     xlim([0,4*10^4])
 end
 
+figure
 for t=1:BATCH_SIZE
     %     14:	Execute a motor command m chosen randomly
     mt   = env.randomAction;
