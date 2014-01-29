@@ -32,7 +32,7 @@ desired_out= [];
 maskInp = ones(1,(1+dtIn)*numel(inputsSet));
 maskOut = ones(1,(1+dtOut)*dimO);
 
-pred         = FFN([1:52], [1:50], [1000 1000], inputsSet, 1);
+pred         = FFN([1:52], [1:50], [10 10], inputsSet, 1);
 % pred.eta =0.001
 % pred.alpha = 0.01
 % 5: m?randommotorcommand
@@ -43,7 +43,7 @@ iPred =1;
 
 %% 9: while true do
 while true
-    time =time+1;
+    time =time+1
     deltas_out = [];
     %LEARNING
     for t=1:BATCH_SIZE
@@ -79,8 +79,8 @@ while true
         %desired_out2        =(desired_out2+1)/2;
         
         for iEpoch=1:NB_EPOCHS
-            data_in2            = memory(end-2*batch_size-pred(iPred).delay+1:end-batch_size-pred(iPred).delay, [pred(iPred).maskInp end]);
-            desired_out2        = memory(end-2*batch_size+1:end-batch_size, [pred(iPred).maskOut]);
+            data_in2            = sMemory(end-2*BATCH_SIZE-pred(iPred).delay+1:end-BATCH_SIZE-pred(iPred).delay, [pred(iPred).maskInp end]);
+            desired_out2        = sMemory(end-2*BATCH_SIZE+1:end-BATCH_SIZE, [pred(iPred).maskOut]);
             [sse pred_out pred(iPred)] = ...
                 bkprop(pred(iPred), data_in2, desired_out2);
             %pred(iPred) = pruning(pred(iPred));
@@ -95,7 +95,7 @@ while true
     pred(iPred).meanError = meanError(iPred);
     
     errorL = error(:,end) ; %mean(error,2);
-    save('control1FFN')
+    save(['control1FFN', num2str(time)])
     
 end
 
@@ -122,7 +122,7 @@ end
 input            = sMemory(end-10-pred(iPred).delay:end-pred(iPred).delay, [pred(iPred).maskInp end]);
 target        = sMemory(end-10:end, [pred(iPred).maskOut]);
     
-output_error = errorInPrediction(pred,input, target, 1)
+output_error = errorInPrediction(pred,input, target, [1:5])
 
 window = 100;
 meanErrorLt = [];

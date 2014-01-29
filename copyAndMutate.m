@@ -47,19 +47,19 @@ if rand()<MUTATE_MASK_PROBABILITY
     if rand()<0.4
         delay = delay+1;
     else
-        delay = delay -1;
+        delay = delay-1;
     end
     mutated = 1;
 end
 
-R1 = pred1.sizeHid1;
+sizeHid = pred1.sizeHid;
 % if rand()<MUTATE_MASK_PROBABILITY
-%     R1 = abs(normrnd(0,pred1.sizeHid1));
+%     R1 = abs(normrnd(0,pred1.sizeHid));
 % end
 % if rand()<MUTATE_MASK_PROBABILITY
 %     R2 = abs(normrnd(0,pred1.sizeHid2));
 % end
-sizeHid1 = min([pred1.sizeHid1,R1]);
+%sizeHid = min([pred1.sizeHid,R1]);
 
 [a maskInp] = find(bitsInp==1);
 [a maskOut] = find(bitsOut==1);
@@ -75,12 +75,15 @@ end
 
 
 % copy
-pred2         = FFN(maskInp, maskOut, R1, inputsSet, delay);
+pred2         = FFN(maskInp, maskOut, sizeHid, inputsSet, delay);
 minInputSize  = min([numel(maskInp), numel(pred1.maskInp)]);
 minOutputSize = min([numel(maskOut), numel(pred1.maskOut)]);
-pred2.w1(1:minInputSize,1:sizeHid1-1)       = pred1.w1(1:minInputSize,1:sizeHid1-1)+0.05-0.1*rand(minInputSize,sizeHid1-1);
-pred2.w3(1:sizeHid2,1:minOutputSize)      = pred1.w3(1:sizeHid1, 1:minOutputSize) + 0.05-0.1*rand(sizeHid1, minOutputSize);
-pred2.method  = [method , num2str(pred1.maskInp), ' to ', num2str(pred1.maskOut)];
+pred2.w{1}(1:minInputSize,1:sizeHid(1)-1)       = pred1.w{1}(1:minInputSize,1:sizeHid(1)-1)+0.05-0.1*rand(minInputSize,sizeHid(1)-1);
+for iHid =2:pred2.nbHid
+    pred2.w{iHid}       = pred1.w{iHid};
+end
+pred2.wOut(1:sizeHid(end),1:minOutputSize) = pred1.wOut(1:sizeHid(end), 1:minOutputSize) + 0.05-0.1*rand(sizeHid(end), minOutputSize);
+pred2.method  = [method ];
 end
 
 
@@ -90,6 +93,6 @@ dimO=4;
 dimM=2;
 pred1=FFN([2 4], [2], 5, inputsSet,1);
 probInput = zeros(1, dimO+dimM);
-[pred2, mutated] = copyAndMutate(pred1, inputsSet, dimO,probInput)
+[pred2, mutated] = copyAndMutate(pred1, inputsSet, dimO,probInput,0.1)
 %pred2 from pred1 should not change
 end

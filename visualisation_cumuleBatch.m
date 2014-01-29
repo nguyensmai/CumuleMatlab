@@ -2,7 +2,7 @@ figure(nPred+1)
 clf
 plot(errorLt);
 hold on
-plot(mean(errorLt,2),'LineWidth',5)
+semilogy(mean(errorLt,2),'LineWidth',5)
 title('error of all predictors and their mean error')
 % 
 % 
@@ -17,12 +17,13 @@ title('error of all predictors and their mean error')
 %     hold on; plot(b(:,1), 'LineWidth',4)
 %     hold on; plot(b(:,4), 'LineWidth',4)
 %     hold on; plot(b(:,5), 'LineWidth',4)
-    title(['mapping (inputs) to the output',num2str(iOut)])
-%end
+[~, inp]= sort(b(end,:));
+    title(sprintf(['mapping (inputs) to the output',num2str(iOut), '\n <-', num2str(inp(end:-1:end-5))]))
+    %end
 % 
 % 
 figure(5)
-plot(errorPerOut')
+semilogy(errorPerOut')
 title('error per Output')
 
 figure(2)
@@ -30,7 +31,7 @@ plot(nbPerOut')
 title('nb of predictors per Output')
 
 figure(3)
-plot(errorArchOut')
+semilogy(errorArchOut')
 title('error of the predictors in the archive')
 
 figure(4)

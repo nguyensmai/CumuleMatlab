@@ -5,7 +5,7 @@
 %
 
 %% PARAMETERS
-nPred = 3*50;
+nPred = 4*50; % 2 layers input mask, 2 layers all 1s , 1 layer input masks, 1 layer all 1s
 dimM = 2;
 dimO = 50;
 MEMORY_SIZE  = 500;
@@ -45,7 +45,6 @@ st   = 2*rand(1,dimO)-1;
 
     
 while true
-    
     %LEARNING
    
      for t=1:BATCH_SIZE
@@ -69,86 +68,142 @@ while true
     
     %% 18:	Neural patterns:
     mutated = 0;
-    %[pred, nPred, mutated, outArchive,globalProbInput] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL,time,globalProbInput);
-    
-    
+    [pred, nPred, mutated, outArchive,globalProbInput] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL,time,globalProbInput);
+
+    if mod(time,100)==0
+        save(['testLayersSize' num2str(time/100)])
+    end
     %% post-processing
-for i=1:5
-subplot(3, 5,i)
+    %{
+    nPlot= 10
+for i=1:nPlot
+subplot(4, nPlot,i)
 semilogy(smooth(pred(i).sseRec,10^3))
-ylim([10^-3 2])
+% ylim([10^-4 2])
 end
-for i=1:5
-subplot(3, 5,i+5)
+for i=1:nPlot
+subplot(4, nPlot,i+nPlot)
 semilogy(smooth(pred(50+i).sseRec,10^3))
-ylim([10^-3 2])
+% ylim([10^-4 2])
 end
-for i=1:5
-subplot(3, 5,i+10)
+for i=1:nPlot
+subplot(4, nPlot,i+2*nPlot)
 semilogy(smooth(pred(100+i).sseRec,10^3))
-ylim([10^-3 2])
+% ylim([10^-4 2])
 end
+    
+    for i=1:nPlot
+subplot(4, nPlot,i+3*nPlot)
+semilogy(smooth(pred(150+i).sseRec,10^3))
+% ylim([10^-4 2])
+end
+    
+for i=1:4
+subplot(4, nPlot,(i-1)*nPlot+1)
+ylim([10^-1 1])
+end
+for i=1:4
+subplot(4, nPlot,(i-1)*nPlot+2)
+ylim([10^-6 1])
+end
+for i=1:4
+subplot(4, nPlot,(i-1)*nPlot+3)
+ylim([10^-5 1])
+end
+for i=1:4
+subplot(4, nPlot,(i-1)*nPlot+4)
+ylim([10^-4 1])
+end
+for i=1:4
+subplot(4, nPlot,(i-1)*nPlot+5)
+ylim([10^-4 1])
+end
+for i=1:4
+subplot(4, nPlot,(i-1)*nPlot+6)
+ylim([10^-6 1])
+end
+for i=1:4
+subplot(4, nPlot,(i-1)*nPlot+7)
+ylim([10^-30 1])
+end
+for i=1:4
+subplot(4, nPlot,(i-1)*nPlot+8)
+ylim([10^-5 1])
+end
+for i=1:4
+subplot(4, nPlot,(i-1)*nPlot+9)
+ylim([10^-3 1])
+end
+for i=1:4
+subplot(4, nPlot,(i-1)*nPlot+10)
+ylim([10^-1 1])
+end
+    
+    
+    
+    for i=1:5
+       subplot(ceil(5/dimO), dimO,i)
+       semilogy(smooth(pred(i).sseRec,10^3))
+       ylim([10^-6 5])
+    end
+%}
 
-%     for i=1:nPred
-%        subplot(ceil(nPred/dimO), dimO,i)
-%        semilogy(smooth(pred(i).sseRec,10^3))
-%        ylim([10^-6 5])
-%     end
-
-
-%     if mutated ==1
-%         mutateLt =[mutateLt; time];
-%     end
-%     
-%     outputsLt{time} = [];
-%     for iPred = 1:nPred
-%         outputsLt{time}{iPred} = pred(iPred).indOutDelay;
-%     end
-%     
-%     inputsLt{time} = [];
-%     for iPred = 1:nPred
-%         inputsLt{time}{iPred} = pred(iPred).maskInp;
-%     end
-%     
-%     for iOut=1:dimO
-%         for input = 1: numel(inputsSet)
-%             inputsMappingTo(iOut,input,time) =0;
-%         end
-%     end
-%     
-%     for iPred=1:nPred
-%         for iOut=outputsLt{time}{iPred}
-%             for input = inputsLt{time}{iPred}
-%                 inputsMappingTo(iOut,input,time) =  inputsMappingTo(iOut,input,time)+1;
-%             end
-%         end
-%     end
-%     
-%     
-%     errorPerOutC = cell(nPred);
-%     errorArchOutC = cell(nPred);
-%     for iPred=1:nPred
-%         if ~isempty(pred(iPred).sseRec)
-%             errorPerOutC{pred(iPred).indOutDelay} =  [errorPerOutC{pred(iPred).indOutDelay}; errorL(iPred)];
-%             if pred(iPred).idFixed>1
-%                 errorArchOutC{pred(iPred).indOutDelay} =  [errorArchOutC{pred(iPred).indOutDelay}; errorL(iPred)];
-%             end
-%         end
-%     end
-%     
-%     for iDim=1:dimO
-%         errorPerOut(iDim,time) =  mean(errorPerOutC{iDim});
-%         nbPerOut(iDim,time) = numel(errorPerOutC{iDim});
-%         errorArchOut(iDim,time) =  mean(errorArchOutC{iDim});
-%         nbArchOut(iDim,time) = numel(errorArchOutC{iDim});
-%     end
-%     
-%     
-%     time = time + 1;
-%      if mod(time,100)==0
-%     save(['environment17',num2str(floor(time/100))])
-%     end
-%     visualisation_cumuleBatch
+    
+    if mutated ==1
+        mutateLt =[mutateLt; time];
+    end
+    
+    outputsLt{time} = [];
+    for iPred = 1:nPred
+        outputsLt{time}{iPred} = pred(iPred).indOutDelay;
+    end
+    
+    inputsLt{time} = [];
+    for iPred = 1:nPred
+        inputsLt{time}{iPred} = pred(iPred).maskInp;
+    end
+    
+    for iOut=1:dimO
+        for input = 1: numel(inputsSet)
+            inputsMappingTo(iOut,input,time) =0;
+        end
+    end
+    
+    for iPred=1:nPred
+        for iOut=outputsLt{time}{iPred}
+            for input = inputsLt{time}{iPred}
+                inputsMappingTo(iOut,input,time) =  inputsMappingTo(iOut,input,time)+1;
+            end
+        end
+    end
+    
+    
+    errorPerOutC = cell(nPred);
+    errorArchOutC = cell(nPred);
+    for iPred=1:nPred
+        if ~isempty(pred(iPred).sseRec)
+            errorPerOutC{pred(iPred).indOutDelay} =  [errorPerOutC{pred(iPred).indOutDelay}; errorL(iPred)];
+            if pred(iPred).idFixed>1
+                errorArchOutC{pred(iPred).indOutDelay} =  [errorArchOutC{pred(iPred).indOutDelay}; errorL(iPred)];
+            end
+        end
+    end
+    
+    for iDim=1:dimO
+        errorPerOut(iDim,time) =  mean(errorPerOutC{iDim});
+        nbPerOut(iDim,time) = numel(errorPerOutC{iDim});
+        errorArchOut(iDim,time) =  mean(errorArchOutC{iDim});
+        nbArchOut(iDim,time) = numel(errorArchOutC{iDim});
+     end
+    
+    
+    time = time + 1;
+     if mod(time,100)==0
+    save(['environment17',num2str(floor(time/100))])
+    end
+    visualisation_cumuleBatch
+    
+    
 end
 
 
@@ -170,10 +225,23 @@ for t=1:BATCH_SIZE
     st  = stp1;
 end
 
+% predictions of the archive
+figure
+archivedL =outArchive.archiveMatrix(:,end);
+numPlot = max(20, numel(archivedL));
+for i= 1:numPlot
+subplot(4,ceil(numPlot/4),i)
+iPred = archivedL(i);
+inp            = sMemory(end-10-pred(iPred).delay:end-pred(iPred).delay, [pred(iPred).maskInp end]);
+target        = sMemory(end-10:end, [pred(iPred).maskOut]);
+
+output_error = errorInPrediction(pred(iPred),inp, target, 1)
+end
+
 
 figure
 for iPred=1:5
-subplot(1,5,i)
+subplot(1,5,iPred)
 inp            = sMemory(end-10-pred(iPred).delay:end-pred(iPred).delay, [pred(iPred).maskInp end]);
 target        = sMemory(end-10:end, [pred(iPred).maskOut]);
 

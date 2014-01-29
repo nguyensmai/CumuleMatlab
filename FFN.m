@@ -103,16 +103,14 @@ classdef FFN
             output_error = trace(error_vect'*error_vect)/obj.sizeOut;  % Sum sqr error, matrix style
             %output_error= output_error.*output_error;
             if exist('plotB','var')
-                if plotB==1
                     if  obj.sizeOut==1
-                        plot([target(:)';predictedOut(:)'])
+                        plot([target(:) predictedOut(:)])
                     else
-                        for iOut =1:obj.sizeOut
-                            subplot(1,obj.sizeOut,iOut)
-                            plot([target(:,iOut);predictedOut(:,iOut)])
+                        for iOut =plotB
+                            subplot(1,numel(plotB),iOut)
+                            plot([target(:,iOut) predictedOut(:,iOut)])
                         end
                     end
-                end
             end
         end
         
@@ -363,10 +361,8 @@ classdef FFN
             target = [0.5; 0.5; 1; 0; 0.5];
             test_error = [];
             while true
-                for i=1:100
-                    x(i,1)= rand();
-                    y(i,1)= rand();
-                end
+                x= rand(100,1);
+                y= rand(100,1);
                 [sse, predictedOut, pred, deltas_out] = bkprop(pred,[x y ones(100,1)],(x+y)/2);
                 
                 test = errorInPrediction(pred,inputTest, target);
@@ -451,11 +447,11 @@ classdef FFN
              % 1D input, 1D output, 2 layers 
             pred         = FFN([1], [1], [5 5], [1], 1);
             inputTest = [sort(rand(10,1)) ones(10,1)];
-            target = cos(3*pi*inputTest(:,1));
+            target = cos(5*pi*inputTest(:,1));
             test_error = [];
             while true
                 x= rand(100,1);
-                [sse, predictedOut, pred, deltas_out] = bkprop(pred,[x ones(100,1)],cos(x*3*pi));
+                [sse, predictedOut, pred, deltas_out] = bkprop(pred,[x ones(100,1)],cos(x*5*pi));
                 
                 test = errorInPrediction(pred,inputTest, target);
                 test_error= [test_error; test];
