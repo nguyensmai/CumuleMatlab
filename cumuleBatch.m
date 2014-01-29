@@ -108,7 +108,7 @@ ylim([10^-6 1])
 end
 for i=1:4
 subplot(4, nPlot,(i-1)*nPlot+3)
-ylim([10^-5 1])
+ylim([10^-4 1])
 end
 for i=1:4
 subplot(4, nPlot,(i-1)*nPlot+4)
@@ -124,7 +124,7 @@ ylim([10^-6 1])
 end
 for i=1:4
 subplot(4, nPlot,(i-1)*nPlot+7)
-ylim([10^-30 1])
+ylim([10^-35 1])
 end
 for i=1:4
 subplot(4, nPlot,(i-1)*nPlot+8)
@@ -136,7 +136,7 @@ ylim([10^-3 1])
 end
 for i=1:4
 subplot(4, nPlot,(i-1)*nPlot+10)
-ylim([10^-1 1])
+ylim([10^-2 1])
 end
     
     

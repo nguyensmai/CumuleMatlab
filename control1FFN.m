@@ -95,8 +95,9 @@ while true
     pred(iPred).meanError = meanError(iPred);
     
     errorL = error(:,end) ; %mean(error,2);
-    save(['control1FFN', num2str(time)])
-    
+     if mod(time,100)==0
+    save(['control1FFN',num2str(floor(time/100))])
+    end    
 end
 
 %% plotting

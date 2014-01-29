@@ -38,35 +38,88 @@ classdef OutputArchive
             pred(iPred).idFixed = time;
         end % end function changeElement
         
-         % archive if good predictors
-         function [outArchive,pred,already] = checkErrorAndAdd(outArchive,pred,iPred,time)
-             already=[];
-             if numel(pred(iPred).sseRec)>61
-                 meanSse1 = mean(pred(iPred).sseRec(end-60:end));
-                 out = pred(iPred).indOutDelay;
-                 if numel(out)==1
-                     [already,~, ~,~, iPredAlready] = findOutput(outArchive, out);
-                     if numel(already)==1
-                     %if a predictor already predicts the same output, keep
-                     %the best
-%                          iPredAlready
-%                          pred(iPredAlready)
-                         meanSseAlready = mean(pred(iPredAlready).sseRec(end-60:end));
-                         if meanSseAlready>meanSse1
-                             [outArchive,pred] = changeElement(outArchive, already,iPredAlready, pred, iPred, time);      
-                         end
-                     elseif isempty(already) && (meanSse1<outArchive.ARCHIVE_THRES)
-                     %if a predictor is good and predicts a new output, add
-                     %to archive
-                         pred(iPred).idFixed = time;
-                         outArchive = addElement(outArchive, pred, iPred, time);
-                     elseif ~isempty(already)
-                         disp('DEPRECATEBADPREDICTORSBATCH: error outArchive contains doublons');
-                     end
-                 end
-             end
-         end
-    
+        % archive if good predictors
+        function [outArchive,pred,already,iPredAlready] = checkErrorAndAdd(outArchive,pred,iPred,time)
+            already=[];
+            if numel(pred(iPred).sseRec)>61
+                meanSse1 = mean(pred(iPred).sseRec(end-60:end));
+                out = pred(iPred).indOutDelay;
+                if numel(out)==1
+                    [already,~, ~,~, iPredAlready] = findOutput(outArchive, out);
+                    if numel(already)==1
+                        %if a predictor already predicts the same output, keep
+                        %the best
+                        %                          iPredAlready
+                        %                          pred(iPredAlready)
+                        meanSseAlready = mean(pred(iPredAlready).sseRec(end-60:end));
+                        if meanSseAlready>meanSse1
+                            [outArchive,pred] = changeElement(outArchive, already,iPredAlready, pred, iPred, time);
+                        end
+                    elseif isempty(already) && (meanSse1<outArchive.ARCHIVE_THRES)
+                        %if a predictor is good and predicts a new output, add
+                        %to archive
+                        pred(iPred).idFixed = time;
+                        outArchive = addElement(outArchive, pred, iPred, time);
+                    elseif ~isempty(already)
+                        disp('DEPRECATEBADPREDICTORSBATCH: error outArchive contains doublons');
+                    end
+                end
+            end
+        end
+        
+        
+        function plotArchiveError(obj)
+            figure
+            nArchived = size(obj.archiveMatrix,1);
+            nPlot = ceil(sqrt(nArchived));
+            archiveM= sortrows(obj.archiveMatrix,1);
+            for i=1:nArchived
+                subplot(nPlot, nPlot,i)
+                semilogy(smooth(pred(archiveM(i,end)).sseRec,10^3))
+                if numel(pred(archiveM(i,end)).sizeHid) == 1
+                    title(['output ', num2str(pred(archiveM(i,end)).maskOut),': 1 hidden layer ',num2str(pred(archiveM(i,end)).sizeHid)]);
+                elseif numel(pred(archiveM(i,end)).sizeHid) == 2
+                    title(['output ', num2str(pred(archiveM(i,end)).maskOut),': 2 hidden layers ',num2str(pred(archiveM(i,end)).sizeHid)]);
+                end
+            end
+        end
+        
+        
+        function output_error = plotArchiveTest(obj,env)
+            sMemory =[];
+            for t=1:4*BATCH_SIZE
+                %     14:	Execute a motor command m chosen randomly
+                mt   = env.randomAction;
+                smt = [st  mt 1];
+                sMemory = [sMemory; smt];
+                
+                %     15:	s(t + 1) ? read from sensorimotor data the new state.
+                stp1  = executeAction(env, st, mt);
+                
+                %     16:	sm(t+1) ? read sensorimotor data
+                st  = stp1;
+            end
+            
+            % predictions of the archive
+            figure
+            archiveM= sortrows(obj.archiveMatrix,1);
+            nArchived = size(obj.archiveMatrix,1);
+            nPlot = ceil(sqrt(nArchived));
+            for i= 1:nArchived
+                subplot(nPlot, nPlot,i)
+                iPred = archiveM(i,end);
+                inp            = sMemory(end-20-pred(iPred).delay:end-pred(iPred).delay, [pred(iPred).maskInp end]);
+                target        = sMemory(end-20:end, [pred(iPred).maskOut]);
+                
+                output_error(i) = errorInPrediction(pred(iPred),inp, target, 1);
+                if numel(pred(archiveM(i,end)).sizeHid) == 1
+                    title(['output ', num2str(pred(archiveM(i,end)).maskOut),': 1 hidden layer ',num2str(pred(archiveM(i,end)).sizeHid)]);
+                elseif numel(pred(archiveM(i,end)).sizeHid) == 2
+                    title(['output ', num2str(pred(archiveM(i,end)).maskOut),': 2 hidden layers ',num2str(pred(archiveM(i,end)).sizeHid)]);
+                end
+                xlim([0 20])
+            end
+        end
         
     end %end methods
     

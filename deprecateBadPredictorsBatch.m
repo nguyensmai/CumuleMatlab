@@ -53,7 +53,7 @@ if pred(iArchived).idFixed == -1 %iArchived predicts something already in the ar
     pred(iArchived).delay = pred(iLooser).delay;
     probInput = mean(globalProbInput([pred(iLooser).indOutDelay pred(iArchived).indOutDelay], :));
     [pred(iArchived), mutated] = copyAndMutate( pred(iArchived), inputsSet,dimO,probInput, 0.1);
-    pred(iArchived).method = [pred(iArchived).method, num2str(pred(iLooser).maskInp), ' to ', num2str(pred(iLooser).maskOut)]
+    pred(iArchived).method = [pred(iArchived).method, num2str(pred(iLooser).maskInp), ' to ', num2str(pred(iLooser).maskOut)];
 else %iArchived is in the archive
     globalProbInput = updateGoalProbInput(globalProbInput, pred, iArchived);
     if rand()< 1-10*pred(iLooser).quality && pred(iLooser).idFixed==-1

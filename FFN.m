@@ -466,8 +466,44 @@ classdef FFN
             figure; plot([predictedOut;target(1:5)']')
             
             
-        end
+         end
         
+        
+         function testInputMask()
+             
+             % 2D inputs
+             pred1         = FFN([1 2], [1], 10, [1 2 3], 1);
+             pred2         = FFN([3], [1], 10, [1 2 3], 1);
+             inputTest = [1  0 0.4 1; ...
+                 0  1  0.6 1; ...
+                 1  1 1 1; ...
+                 0  0 0 1; ...
+                 0.5 0.5 0.1  1];
+             target = [0.5; 0.5; 1; 0; 0.5];
+             test_error = [];
+             while true
+                 x= rand(100,1);
+                 y= rand(100,1);
+                 z= rand(100,1);
+                 [sse1, predictedOut, pred1, deltas_out] = bkprop(pred1,[x y ones(100,1)],(x+y)/2);
+                 [sse2, predictedOut, pred2, deltas_out] = bkprop(pred2,[z ones(100,1)],(x+y)/2);
+                 
+                 test1 = errorInPrediction(pred1,inputTest(:,[pred1.maskInp end]), target);
+                 test2 = errorInPrediction(pred2,inputTest(:,[pred2.maskInp end]), target);
+                 test_error= [test_error; test1 test2];
+                 semilogy(test_error)
+             end
+             predictedOut =[]
+             [predictedOut(1), ~]= predict(pred,[1  0 1]);  %expects 0.5
+             [predictedOut(2), ~]= predict(pred,[0  1 1]);  %expects 0.5
+             [predictedOut(3), ~]= predict(pred,[1  1 1]);  %expects 1
+             [predictedOut(4), ~]= predict(pred,[0  0 1]);  %expects 0
+             [predictedOut(5), ~]= predict(pred,[0.5 0.5 1]);%expects 0.5
+             figure; plot([predictedOut;target(1:5)']')
+             
+         end
+             
+             
         function testPruning()
             pred         = FFN([1 2 3 4], [1], 3, [1 2 3 4], 1);
             inpTest = [ [1 1 1 1 ];...
