@@ -96,19 +96,20 @@ classdef FFN
         end
         
       
-        % output_error is the matrix of square error for each dim and data 
-        function output_error = errorInPrediction(obj,input, target, plotB)
+        % error_vect is the matrix of square error for each dim and data 
+        function [output_error error_vect] = errorInPrediction(obj,input, target, plotB)
             [predictedOut ]= predict(obj,input);
             error_vect   = target - predictedOut;   % Error matrix
-            output_error = trace(error_vect'*error_vect)/obj.sizeOut;  % Sum sqr error, matrix style
-            %output_error= output_error.*output_error;
+            output_error = trace(error_vect'*error_vect)/(obj.sizeOut * size(input,1));  % Sum sqr error, matrix style
+            %output_error = output_error.*output_error;
             if exist('plotB','var')
                     if  obj.sizeOut==1
                         plot([target(:) predictedOut(:)])
                     else
-                        for iOut =plotB
-                            subplot(1,numel(plotB),iOut)
-                            plot([target(:,iOut) predictedOut(:,iOut)])
+                        nPlot = ceil(sqrt(numel(plotB)));
+                        for iOut =1:numel(plotB)
+                            subplot(nPlot,nPlot,plotB(iOut))
+                            plot([target(:,plotB(iOut)) predictedOut(:,plotB(iOut))])
                         end
                     end
             end

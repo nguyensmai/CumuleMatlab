@@ -19,17 +19,19 @@ mutated = 0;
 probInput = probInput/max(probInput);
 
 % mutation
-for iInp=1:sizeInput
-    if rand()< MUTATE_MASK_PROBABILITY
-        if rand()<probInput(iInp)
-            mutated = mutated|(bitsInp(iInp)~=1);
-            bitsInp(iInp) =  1;
-        else
-            mutated = mutated|(bitsInp(iInp)~=0);
-            bitsInp(iInp) =  0;
-        end
-    end
-end
+
+% for iInp=1:sizeInput
+%     if rand()< MUTATE_MASK_PROBABILITY
+%         if rand()<probInput(iInp)
+%             mutated = mutated|(bitsInp(iInp)~=1);
+%             bitsInp(iInp) =  1;
+%         else
+%             mutated = mutated|(bitsInp(iInp)~=0);
+%             bitsInp(iInp) =  0;
+%         end
+%     end
+% end
+
 % if rand()< MUTATE_MASK_PROBABILITY/2
 %     swap1 = randi(sizeInput,1);
 %     bitsInp(swap1) = 1-bitsInp(swap1);
@@ -43,14 +45,14 @@ if rand()<MUTATE_MASK_PROBABILITY
 end
 
 delay = pred1.delay;
-if rand()<MUTATE_MASK_PROBABILITY
-    if rand()<0.4
-        delay = delay+1;
-    else
-        delay = delay-1;
-    end
-    mutated = 1;
-end
+% if rand()<MUTATE_MASK_PROBABILITY
+%     if rand()<0.4
+%         delay = delay+1;
+%     else
+%         delay = delay-1;
+%     end
+%     mutated = 1;
+% end
 
 sizeHid = pred1.sizeHid;
 % if rand()<MUTATE_MASK_PROBABILITY

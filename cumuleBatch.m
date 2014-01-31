@@ -4,20 +4,21 @@
 % nguyensmai.free.fr
 %
 
-%% PARAMETERS
+%% %%%%%%%%%%%%%%%%%% PARAMETERS %%%%%%%%%%%%%%%%%%
 nPred = 4*50; % 2 layers input mask, 2 layers all 1s , 1 layer input masks, 1 layer all 1s
 dimM = 2;
 dimO = 50;
 MEMORY_SIZE  = 500;
 BATCH_SIZE   = 100;
 
-%% 3: INITIALISATION
+%%  %%%%%%%%%%%%%%% INITIALISATION %%%%%%%%%%%%%%%%%%
 rng('shuffle');
 nbFixed = 0;
 env = Environment(dimO,dimM);
 inputsSet = 1:(dimO+dimM) ;
-% 7: initialise short-term memory
+% 7: initialise short-term and long-term memory
 sMemory = []; %zeros(MEMORY_SIZE, dimO+dimM+1);
+lMemory = [];
 %save test_initialisation_gamma1
 time = 1;
 outArchive = OutputArchive(); %archive of the outputs of the good predictors
@@ -41,13 +42,13 @@ mt   = env.randomAction;
 st   = 2*rand(1,dimO)-1;
 
 
-%% 9: while true do
+%%  %%%%%%%%%%%%%%% RUNNING EVERY TIMESTEP %%%%%%%%%%%%%%%%%%
 
-    
+
 while true
-    %LEARNING
-   
-     for t=1:BATCH_SIZE
+    
+    %% collect data and update the memory
+    for t=1:BATCH_SIZE
         %     14:	Execute a motor command m chosen randomly
         mt   = env.randomAction;
         smt = [st  mt 1];
@@ -58,21 +59,25 @@ while true
         
         %     16:	sm(t+1) ? read sensorimotor data
         st  = stp1;
-     end
- 
-    %     17:	(pred, outPred, error, errMap) = TrainPredictors(pred, nPred, predData, sm)
-    [pred, outPred, errorL] = TrainPredictorsBatch(pred, sMemory, BATCH_SIZE, dimO) ;
+    end
+    
+    if size(lMemory,1)<2*BATCH_SIZE
+        lMemory = [sMemory;sMemory];
+    else
+        lMemory=[lMemory(2:end,:); sMemory(randi(BATCH_SIZE,1),:)];
+    end
+    
+    %% learning
+    [pred, outPred, errorL] = TrainPredictorsBatch(pred, sMemory,lMemory, BATCH_SIZE, dimO) ;
     errorLt = [errorLt; errorL'];
     progressL = [];
     
     
-    %% 18:	Neural patterns:
+    %% Evolution
     mutated = 0;
     [pred, nPred, mutated, outArchive,globalProbInput] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL,time,globalProbInput);
-
-    if mod(time,100)==0
-        save(['testLayersSize' num2str(time/100)])
-    end
+    
+   
     %% post-processing
     %{
     nPlot= 10
@@ -146,8 +151,8 @@ end
        semilogy(smooth(pred(i).sseRec,10^3))
        ylim([10^-6 5])
     end
-%}
-
+    %}
+    
     
     if mutated ==1
         mutateLt =[mutateLt; time];
@@ -194,12 +199,12 @@ end
         nbPerOut(iDim,time) = numel(errorPerOutC{iDim});
         errorArchOut(iDim,time) =  mean(errorArchOutC{iDim});
         nbArchOut(iDim,time) = numel(errorArchOutC{iDim});
-     end
+    end
     
     
     time = time + 1;
-     if mod(time,100)==0
-    save(['environment17',num2str(floor(time/100))])
+    if mod(time,100)==0
+        save(['environment50_',num2str(floor(time/100))])
     end
     visualisation_cumuleBatch
     
@@ -208,8 +213,7 @@ end
 
 
 
-%% plot results
-
+%%  %%%%%%%%%%%%%%% PLOT RESULTS AFTERWARDS %%%%%%%%%%%%%%%%%%
 
 
 for t=1:BATCH_SIZE
@@ -230,22 +234,22 @@ figure
 archivedL =outArchive.archiveMatrix(:,end);
 numPlot = max(20, numel(archivedL));
 for i= 1:numPlot
-subplot(4,ceil(numPlot/4),i)
-iPred = archivedL(i);
-inp            = sMemory(end-10-pred(iPred).delay:end-pred(iPred).delay, [pred(iPred).maskInp end]);
-target        = sMemory(end-10:end, [pred(iPred).maskOut]);
-
-output_error = errorInPrediction(pred(iPred),inp, target, 1)
+    subplot(4,ceil(numPlot/4),i)
+    iPred = archivedL(i);
+    inp           = sMemory(end-10-pred(iPred).delay:end-pred(iPred).delay, [pred(iPred).maskInp end]);
+    target        = sMemory(end-10:end, [pred(iPred).maskOut]);
+    
+    output_error = errorInPrediction(pred(iPred),inp, target, 1)
 end
 
 
 figure
 for iPred=1:5
-subplot(1,5,iPred)
-inp            = sMemory(end-10-pred(iPred).delay:end-pred(iPred).delay, [pred(iPred).maskInp end]);
-target        = sMemory(end-10:end, [pred(iPred).maskOut]);
-
-output_error = errorInPrediction(pred(iPred),inp, target, 1)
+    subplot(1,5,iPred)
+    inp            = sMemory(end-10-pred(iPred).delay:end-pred(iPred).delay, [pred(iPred).maskInp end]);
+    target        = sMemory(end-10:end, [pred(iPred).maskOut]);
+    
+    output_error = errorInPrediction(pred(iPred),inp, target, 1)
 end
 
 
@@ -262,3 +266,16 @@ for iPred = 1:nPred
     figure(iPred);
     plot(pred(iPred).sseRec); xlabel('Epochs'); ylabel('Sum squared error (SSE1)'); % The end
 end
+
+
+%time plot of the best predictors
+figure
+nbArchOutFunc(2,:)=sum(nbArchOut(2:10:end,:),1);
+nbArchOutFunc(3,:)=sum(nbArchOut(3:10:end,:),1);
+nbArchOutFunc(4,:)=sum(nbArchOut(4:10:end,:),1);
+nbArchOutFunc(5,:)=sum(nbArchOut(5:10:end,:),1);
+nbArchOutFunc(6,:)=sum(nbArchOut(6:10:end,:),1);
+nbArchOutFunc(8,:)=sum(nbArchOut(8:10:end,:),1);
+nbArchOutFunc(9,:)=sum(nbArchOut(9:10:end,:),1);
+nbArchOutFunc(10,:)=sum(nbArchOut(10:10:end,:),1);
+plot(nbArchOutFunc')

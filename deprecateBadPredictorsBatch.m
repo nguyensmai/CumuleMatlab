@@ -9,30 +9,25 @@ already1 = [];
 already2 = [];
 mutated = 0;
 
-for iDepr = 1:1 %nPred/10
+for iDepr = 1:nPred/10
     iPreds = randperm(nPred,2);
     iPred1 = iPreds(1);
     iPred2 = iPreds(2);
     mutated1 = 0;
     
     % archive if good predictors
-    [outArchive, pred,already1] = checkErrorAndAdd(outArchive,pred,iPred1,time);
-    [outArchive, pred,already2] = checkErrorAndAdd(outArchive,pred,iPred2,time);
+    [outArchive, pred,already1,iPredAlready1] = checkErrorAndAdd(outArchive,pred,iPred1,time);
+    [outArchive, pred,already2,iPredAlready2] = checkErrorAndAdd(outArchive,pred,iPred2,time);
     
     %compute fitness of the predictors
-    fitness1 = getFitnessBatch( errorL(iPred1), pred(iPred1).quality, pred(iPred1).indOutDelay, outArchive);
-    fitness2 = getFitnessBatch( errorL(iPred2), pred(iPred2).quality , pred(iPred2).indOutDelay, outArchive);
-    if ~isempty(already2) %out2 is already in the archive
-        [ pred, globalProbInput, mutated1] = deprecateAlreadyInArchive(pred,iPred2, iPred1, globalProbInput, inputsSet, dimO);
-    elseif ~isempty(already1)
-        [ pred, globalProbInput, mutated1] = deprecateAlreadyInArchive(pred,iPred1, iPred2, globalProbInput, inputsSet, dimO);
-    else
-        % deprecate based on fitness value
-        if (fitness1>fitness2) && (pred(iPred2).idFixed ==-1) && (rand<(fitness1-fitness2)/fitness1)
-            [pred, globalProbInput, mutated1 ] = deprecatedBasedOnFitness(pred, iPred2, iPred1, globalProbInput, inputsSet, dimO );
-        elseif pred(iPred1).idFixed == -1 && (rand<(fitness2-fitness1)/fitness2);
-            [pred, globalProbInput, mutated1 ] = deprecatedBasedOnFitness(pred, iPred1, iPred2, globalProbInput, inputsSet, dimO );
-        end
+    fitness1 = getFitnessBatch( pred, iPred1,iPredAlready1);
+    fitness2 = getFitnessBatch( pred, iPred2, iPredAlready2);
+    
+    % deprecate based on fitness value
+    if (fitness1>fitness2) && (pred(iPred2).idFixed ==-1) && (rand<(fitness1-fitness2)/fitness1)
+        [pred, globalProbInput, mutated1 ] = deprecatedBasedOnFitness(pred, iPred2, iPred1, globalProbInput, inputsSet, dimO );
+    elseif pred(iPred1).idFixed == -1 && (rand<(fitness2-fitness1)/fitness2);
+        [pred, globalProbInput, mutated1 ] = deprecatedBasedOnFitness(pred, iPred1, iPred2, globalProbInput, inputsSet, dimO );
     end
     mutated = mutated||mutated1;
 end
@@ -63,7 +58,7 @@ else %iArchived is in the archive
         newPred.delay = pred(iLooser).delay;
         probInput = mean(globalProbInput([pred(iLooser).indOutDelay pred(iArchived).indOutDelay], :));
         [pred(iLooser), mutated] = copyAndMutate(newPred, inputsSet, dimO,probInput,0.1);
-        pred(iLooser).method = [pred(iLooser).method, num2str(newPred.maskInp), ' to ', num2str(newPred.maskOut)]
+        pred(iLooser).method = [pred(iLooser).method, num2str(newPred.maskInp), ' to ', num2str(newPred.maskOut)];
     end
 end
 end
@@ -135,8 +130,8 @@ inputsSet = [1:6];
 dimO=4;
 dimM=2;
 globalProbInput=0.4*ones(dimO,dimM+dimO);
-pred(1)=FFN([2 4], [2],5, 5, inputsSet,1);
-pred(2)=FFN([1 3], [1],5, 5, inputsSet,1);
+pred(1)=FFN([2 4], [2],[5, 5], inputsSet,1);
+pred(2)=FFN([1 3], [1],[10], inputsSet,1);
 pred(2).idFixed=1;
 pred(2).maskPruned = [4];
 [pred, globalProbInput, mutated ] = deprecatedBasedOnFitness(pred, 1, 2, globalProbInput, inputsSet, dimO )

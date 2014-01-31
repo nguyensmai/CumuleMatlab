@@ -1,13 +1,14 @@
 classdef OutputArchive
     properties
         archiveMatrix
+        history
         ARCHIVE_THRES  %max error threshold to be added to the archive
     end
     
     methods
         function outputArchive = OutputArchive()
             outputArchive.archiveMatrix = [];
-            outputArchive.ARCHIVE_THRES = 0.05;
+            outputArchive.ARCHIVE_THRES = 10;  %10 means we in practive do not use thres
         end
         
         %find if the output is has already a predictor in the archive
@@ -30,6 +31,11 @@ classdef OutputArchive
         
         function outArchive = addElement(outArchive, pred, iPred, time)
             outArchive.archiveMatrix = [outArchive.archiveMatrix; pred(iPred).indOutDelay pred(iPred).maskOut pred(iPred).delay time iPred];
+            if numel(pred(iPred).sizeHid)==2
+                outArchive.history = [outArchive.history; pred(iPred).indOutDelay pred(iPred).maskOut pred(iPred).delay time iPred pred(iPred).sizeHid];
+            elseif numel(pred(iPred).sizeHid)==1
+                outArchive.history = [outArchive.history; pred(iPred).indOutDelay pred(iPred).maskOut pred(iPred).delay time iPred pred(iPred).sizeHid 0];
+            end
         end %end function addElement
         
         function [outArchive,pred] = changeElement(outArchive,already,iPredAlready, pred,iPred,time)
@@ -41,6 +47,7 @@ classdef OutputArchive
         % archive if good predictors
         function [outArchive,pred,already,iPredAlready] = checkErrorAndAdd(outArchive,pred,iPred,time)
             already=[];
+            iPredAlready = [];
             if numel(pred(iPred).sseRec)>61
                 meanSse1 = mean(pred(iPred).sseRec(end-60:end));
                 out = pred(iPred).indOutDelay;
@@ -68,7 +75,7 @@ classdef OutputArchive
         end
         
         
-        function plotArchiveError(obj)
+        function plotArchiveError(obj,pred)
             figure
             nArchived = size(obj.archiveMatrix,1);
             nPlot = ceil(sqrt(nArchived));

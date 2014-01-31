@@ -101,10 +101,12 @@ while true
 end
 
 %% plotting
-for i=1:5
-    subplot(1,5,i)
-    semilogy(smooth(abs(errorLt(:,i)),10^4))
-    xlim([0,4*10^4])
+nPlot = ceil(sqrt(dimO));
+for i=1:dimO
+    subplot(nPlot,nPlot,i)
+    semilogy(smooth(abs(errorLt(:,i)),10^3))
+    title(['output ',num2str(i)])
+    %xlim([0,4*10^4])
 end
 
 figure
@@ -120,10 +122,10 @@ for t=1:BATCH_SIZE
     %     16:	sm(t+1) ? read sensorimotor data
     st  = stp1;
 end
-input            = sMemory(end-10-pred(iPred).delay:end-pred(iPred).delay, [pred(iPred).maskInp end]);
-target        = sMemory(end-10:end, [pred(iPred).maskOut]);
+input            = sMemory(end-20-pred(iPred).delay:end-pred(iPred).delay, [pred(iPred).maskInp end]);
+target        = sMemory(end-20:end, [pred(iPred).maskOut]);
     
-output_error = errorInPrediction(pred,input, target, [1:5])
+output_error = errorInPrediction(pred,input, target, [1:50])
 
 window = 100;
 meanErrorLt = [];

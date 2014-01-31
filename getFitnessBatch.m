@@ -1,15 +1,13 @@
-function fitness = getFitnessBatch(error, progress, out, outArchive)
+function fitness = getFitnessBatch(pred,iPred, iBest, outArchive)
 %
 % Author : Nguyen Sao Mai
 % nguyensmai@gmail.com
 % nguyensmai.free.fr
 % 
-
-fitness = progress;
-% if numel(out)==1 && ~isempty(outArchive) && any(outArchive(:,1)==out)
-%     fitness = 0;
-% else
-%     fitness = 1/error;
-% end
+if isempty(iBest)
+    fitness = 1;
+else
+    fitness = pred(iBest).quality/pred(iPred).quality;
+end
 
 end
