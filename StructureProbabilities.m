@@ -53,9 +53,14 @@ classdef StructureProbabilities < handle
 		  end
 		end
 
-		function sample = getSample(obj, hidden_layer)
-		  [mu, sigma] = getMuSigma(obj, hidden_layer);
+		function sample = getSample(obj, problem, hidden_layer)
+		  [mu, sigma] = getMuSigma(obj, problem, hidden_layer);
 		  sample = floor((sigma*randn())+mu);
+		  if (sample < 1) & (hidden_layer == 1)
+			sample = 1;
+		  elseif sample < 0
+			sample = 0;
+		  end
 		end
 	end
 end

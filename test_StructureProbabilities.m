@@ -4,6 +4,7 @@ function test_StructureProbabilities()
   test_setMuSigma();
   test_updateProbability();
   test_updateProbabilities();
+  test_getSample();
 end
 
 function test_initialiaseStructureProbabilities()
@@ -80,4 +81,13 @@ function test_updateProbabilities()
 	new_probs(i) = round(new_probs(i)*1e4)/1.0e4;
   end
   assert(isequal(new_probs, [6.0 4.0396 2 1.0]));
+end
+
+function test_getSample()
+  sp = StructureProbabilities(5, 2, [5 0], [4 1]);
+  sample = getSample(sp, 2, 1);
+  assert(sample > 0);
+
+  sample = getSample(sp, 2, 2);
+  assert(sample >= 0);
 end
