@@ -32,7 +32,7 @@ desired_out= [];
 maskInp = ones(1,(1+dtIn)*numel(inputsSet));
 maskOut = ones(1,(1+dtOut)*dimO);
 
-pred         = FFN([1:52], [1:50], [10 10], inputsSet, 1);
+pred         = FFN([1:52], [1:50], [50 50], inputsSet, 1);
 % pred.eta =0.001
 % pred.alpha = 0.01
 % 5: m?randommotorcommand
@@ -43,7 +43,7 @@ iPred =1;
 
 %% 9: while true do
 while true
-    time =time+1
+    time =time+1;
     deltas_out = [];
     %LEARNING
     for t=1:BATCH_SIZE
@@ -96,7 +96,7 @@ while true
     
     errorL = error(:,end) ; %mean(error,2);
      if mod(time,100)==0
-    save(['control1FFN',num2str(floor(time/100))])
+    save(['control1FFN5050',num2str(floor(time/100))])
     end    
 end
 

@@ -42,6 +42,11 @@ classdef OutputArchive
             outArchive.archiveMatrix(already,:) = [ pred(iPred).indOutDelay pred(iPred).maskOut pred(iPred).delay time iPred];
             pred(iPredAlready).idFixed = -1;
             pred(iPred).idFixed = time;
+            if numel(pred(iPred).sizeHid)==2
+                outArchive.history = [outArchive.history; pred(iPred).indOutDelay pred(iPred).maskOut pred(iPred).delay time iPred pred(iPred).sizeHid];
+            elseif numel(pred(iPred).sizeHid)==1
+                outArchive.history = [outArchive.history; pred(iPred).indOutDelay pred(iPred).maskOut pred(iPred).delay time iPred pred(iPred).sizeHid 0];
+            end
         end % end function changeElement
         
         % archive if good predictors
@@ -49,7 +54,7 @@ classdef OutputArchive
             already=[];
             iPredAlready = [];
             if numel(pred(iPred).sseRec)>61
-                meanSse1 = mean(pred(iPred).sseRec(end-60:end));
+                meanSse1 = pred(iPred).meanError;
                 out = pred(iPred).indOutDelay;
                 if numel(out)==1
                     [already,~, ~,~, iPredAlready] = findOutput(outArchive, out);
@@ -58,7 +63,7 @@ classdef OutputArchive
                         %the best
                         %                          iPredAlready
                         %                          pred(iPredAlready)
-                        meanSseAlready = mean(pred(iPredAlready).sseRec(end-60:end));
+                        meanSseAlready = pred(iPredAlready).meanError;
                         if meanSseAlready>meanSse1
                             [outArchive,pred] = changeElement(outArchive, already,iPredAlready, pred, iPred, time);
                         end
@@ -75,7 +80,7 @@ classdef OutputArchive
         end
         
         
-        function plotArchiveError(obj,pred)
+        function plotArchiveError(obj,pred) %script
             figure
             nArchived = size(obj.archiveMatrix,1);
             nPlot = ceil(sqrt(nArchived));
@@ -92,7 +97,7 @@ classdef OutputArchive
         end
         
         
-        function output_error = plotArchiveTest(obj,env)
+        function output_error = plotArchiveTest(obj,env) %script
             sMemory =[];
             for t=1:4*BATCH_SIZE
                 %     14:	Execute a motor command m chosen randomly

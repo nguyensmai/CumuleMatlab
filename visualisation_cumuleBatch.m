@@ -1,6 +1,6 @@
 figure(nPred+1)
 clf
-plot(errorLt);
+semilogy(errorLt);
 hold on
 semilogy(mean(errorLt,2),'LineWidth',5)
 title('error of all predictors and their mean error')

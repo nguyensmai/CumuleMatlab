@@ -9,7 +9,7 @@ nPred = 4*50; % 2 layers input mask, 2 layers all 1s , 1 layer input masks, 1 la
 dimM = 2;
 dimO = 50;
 MEMORY_SIZE  = 500;
-BATCH_SIZE   = 100;
+BATCH_SIZE   = 50;
 
 %%  %%%%%%%%%%%%%%% INITIALISATION %%%%%%%%%%%%%%%%%%
 rng('shuffle');
@@ -27,7 +27,7 @@ progressLt = [];
 mutateLt=[];
 outputsLt ={};
 inputsMappingTo = [];
-nbArchOut = [];
+nbArchOut = zeros(dimO,1);
 errorArchOut = [];
 errorPerOut =  [];
 nbPerOut = [];
@@ -61,10 +61,10 @@ while true
         st  = stp1;
     end
     
-    if size(lMemory,1)<2*BATCH_SIZE
-        lMemory = [sMemory;sMemory];
+    if size(lMemory,1)<3*BATCH_SIZE
+        lMemory = [sMemory;sMemory;sMemory];
     else
-        lMemory=[lMemory(2:end,:); sMemory(randi(BATCH_SIZE,1),:)];
+        lMemory=[lMemory(3:end,:); sMemory(randi(BATCH_SIZE,[2 1]),:)];
     end
     
     %% learning
@@ -198,13 +198,23 @@ end
         errorPerOut(iDim,time) =  mean(errorPerOutC{iDim});
         nbPerOut(iDim,time) = numel(errorPerOutC{iDim});
         errorArchOut(iDim,time) =  mean(errorArchOutC{iDim});
-        nbArchOut(iDim,time) = numel(errorArchOutC{iDim});
+        if time>1
+            nbArchOut(iDim,time) = nbArchOut(iDim,time-1);
+        end
     end
     
+    if ~isempty(outArchive.history)
+        timeLastArchived = find(outArchive.history(:,4)==time);
+        if ~isempty(timeLastArchived)
+            lastArchived = outArchive.history(timeLastArchived,:);
+            iDim = lastArchived(:,1);
+            nbArchOut(iDim,time) = nbArchOut(iDim,time)+1;
+        end
+    end
     
     time = time + 1;
     if mod(time,100)==0
-        save(['environment50_',num2str(floor(time/100))])
+        save(['environment50bis_',num2str(floor(time/100))])
     end
     visualisation_cumuleBatch
     

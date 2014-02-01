@@ -21,18 +21,17 @@ for iPred = 1:nPred
             error(iPred, iEpoch)   =  sse;
         end
         
-        inp          = lMemory(end-batch_size-pred(iPred).delay+1:end-pred(iPred).delay, [pred(iPred).maskInp end]);
-        target       = lMemory(end-batch_size+1:end, [pred(iPred).maskOut]);
+        inp          = lMemory(end-2*batch_size-pred(iPred).delay+1:end-pred(iPred).delay, [pred(iPred).maskInp end]);
+        target       = lMemory(end-2*batch_size+1:end, [pred(iPred).maskOut]);
         output_error = errorInPrediction(pred(iPred),inp, target);
     
-        pred(iPred).quality   = output_error + 0.95*pred(iPred).quality;
+        pred(iPred).quality   = output_error + 0.98*pred(iPred).quality;
+        pred(iPred).meanError = output_error;
+
     end
 end
 
-meanError = mean(error,2);
-for iPred=1:nPred
-    pred(iPred).meanError = meanError(iPred);
-end
+
 
 errorL = error(:,end) ; %mean(error,2);
 %progressL = error(:,1)- error(:,end);
