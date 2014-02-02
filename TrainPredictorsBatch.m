@@ -6,7 +6,7 @@ NB_EPOCHS = 10;
 nPred   = numel(pred);
 error   = zeros(nPred,NB_EPOCHS);
 outPred = cell(1,nPred);
-
+errorL =-ones(nPred,1);
 
 for iPred = 1:nPred
     %     iPred
@@ -25,15 +25,16 @@ for iPred = 1:nPred
         target       = lMemory(end-2*batch_size+1:end, [pred(iPred).maskOut]);
         output_error = errorInPrediction(pred(iPred),inp, target);
     
-        pred(iPred).quality   = output_error + 0.98*pred(iPred).quality;
-        pred(iPred).meanError = output_error;
-
+        pred(iPred).progress  = pred(iPred).quality;
+        pred(iPred).quality   = abs(output_error) + 0.98*pred(iPred).quality;
+        pred(iPred).meanError = abs(output_error);
     end
+    errorL(iPred) = pred(iPred).meanError;
 end
 
 
 
-errorL = error(:,end) ; %mean(error,2);
+%errorL = error(:,end) ; %mean(error,2);
 %progressL = error(:,1)- error(:,end);
 
 

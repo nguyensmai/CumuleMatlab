@@ -75,7 +75,7 @@ while true
     
     %% Evolution
     mutated = 0;
-    [pred, nPred, mutated, outArchive,globalProbInput] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL,time,globalProbInput);
+    %[pred, nPred, mutated, outArchive,globalProbInput] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL,time,globalProbInput);
     
    
     %% post-processing
@@ -214,7 +214,7 @@ end
     
     time = time + 1;
     if mod(time,100)==0
-       save(['environment50ter_',num2str(floor(time/100))])
+       save(['trainBatch240201_',num2str(floor(time/100))])
     end
     visualisation_cumuleBatch(nPred,errorLt,nbPerOut,inputsMappingTo, inputsSet, time, errorPerOut, errorArchOut,nbArchOut )
 

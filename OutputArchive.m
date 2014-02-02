@@ -130,6 +130,7 @@ classdef OutputArchive
                     title(['output ', num2str(pred(archiveM(i,end)).maskOut),': 2 hidden layers ',num2str(pred(archiveM(i,end)).sizeHid)]);
                 end
                 xlim([0 20])
+                ylim([-1 1])
             end
         end
         

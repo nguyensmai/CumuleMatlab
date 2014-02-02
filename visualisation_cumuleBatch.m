@@ -1,3 +1,4 @@
+function visualisation_cumuleBatch(nPred,errorLt,nbPerOut,inputsMappingTo, inputsSet, time, errorPerOut, errorArchOut,nbArchOut )
 figure(nPred+1)
 clf
 semilogy(errorLt);
@@ -38,5 +39,5 @@ figure(4)
 plot(nbArchOut')
 title('nb of the predictors in the archive')
 
-
+end
 

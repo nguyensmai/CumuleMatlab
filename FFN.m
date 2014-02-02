@@ -97,10 +97,10 @@ classdef FFN
         
       
         % error_vect is the matrix of square error for each dim and data 
-        function [output_error error_vect] = errorInPrediction(obj,input, target, plotB)
-            [predictedOut ]= predict(obj,input);
+        function [output_error error_vect] = errorInPrediction(obj,inp, target, plotB)
+            [predictedOut ]= predict(obj,inp);
             error_vect   = target - predictedOut;   % Error matrix
-            output_error = trace(error_vect'*error_vect)/(obj.sizeOut * size(input,1));  % Sum sqr error, matrix style
+            output_error = trace(error_vect'*error_vect)/(obj.sizeOut * size(inp,1));  % Sum sqr error, matrix style
             %output_error = output_error.*output_error;
             if exist('plotB','var')
                     if  obj.sizeOut==1

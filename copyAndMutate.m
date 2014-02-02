@@ -78,13 +78,13 @@ end
 
 % copy
 pred2         = FFN(maskInp, maskOut, sizeHid, inputsSet, delay);
-minInputSize  = min([numel(maskInp), numel(pred1.maskInp)]);
-minOutputSize = min([numel(maskOut), numel(pred1.maskOut)]);
-pred2.w{1}(1:minInputSize,1:sizeHid(1)-1)       = pred1.w{1}(1:minInputSize,1:sizeHid(1)-1)+0.05-0.1*rand(minInputSize,sizeHid(1)-1);
-for iHid =2:pred2.nbHid
-    pred2.w{iHid}       = pred1.w{iHid};
-end
-pred2.wOut(1:sizeHid(end),1:minOutputSize) = pred1.wOut(1:sizeHid(end), 1:minOutputSize) + 0.05-0.1*rand(sizeHid(end), minOutputSize);
+% minInputSize  = min([numel(maskInp), numel(pred1.maskInp)]);
+% minOutputSize = min([numel(maskOut), numel(pred1.maskOut)]);
+% pred2.w{1}(1:minInputSize,1:sizeHid(1)-1)       = pred1.w{1}(1:minInputSize,1:sizeHid(1)-1)+0.05-0.1*rand(minInputSize,sizeHid(1)-1);
+% for iHid =2:pred2.nbHid
+%     pred2.w{iHid}       = pred1.w{iHid};
+% end
+% pred2.wOut(1:sizeHid(end),1:minOutputSize) = pred1.wOut(1:sizeHid(end), 1:minOutputSize) + 0.05-0.1*rand(sizeHid(end), minOutputSize);
 pred2.method  = [method ];
 end
 

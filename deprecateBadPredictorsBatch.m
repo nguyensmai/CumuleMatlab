@@ -9,7 +9,7 @@ already1 = [];
 already2 = [];
 mutated = 0;
 
-for iDepr = 1:1; %nPred/20
+for iDepr = 1:nPred/10
     iPreds = randperm(nPred,2);
     iPred1 = iPreds(1);
     iPred2 = iPreds(2);
@@ -72,7 +72,7 @@ end
 function [pred, globalProbInput, mutated ] = deprecatedBasedOnFitness(pred, iLooser, iWinner, globalProbInput, inputsSet, dimO )
 globalProbInput = updateGoalProbInput(globalProbInput, pred, iWinner);
 probInput = mean(globalProbInput([pred(iLooser).indOutDelay pred(iWinner).indOutDelay], :));
-[pred(iLooser), mutated] = copyAndMutate( pred(iWinner), inputsSet, dimO,probInput,0.2);
+[pred(iLooser), mutated] = copyAndMutate( pred(iWinner), inputsSet, dimO,probInput,0.5);
 pred(iLooser).method = [pred(iLooser).method, num2str(pred(iWinner).maskInp), ' to ', num2str(pred(iWinner).maskOut)];
 end
 
