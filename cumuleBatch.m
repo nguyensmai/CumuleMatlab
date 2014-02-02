@@ -3,7 +3,7 @@
 % nguyensmai@gmail.com
 % nguyensmai.free.fr
 %
-function cumuleBatch(filename)
+
 %% %%%%%%%%%%%%%%%%%% PARAMETERS %%%%%%%%%%%%%%%%%%
 nPred = 4*50; % 2 layers input mask, 2 layers all 1s , 1 layer input masks, 1 layer all 1s
 dimM = 2;
@@ -235,7 +235,7 @@ end
     
     time = time + 1;
     if mod(time,100)==0
-       save([filename,'_',num2str(floor(time/100))])
+       save(['cumuleBatch',num2str(floor(time/100))])
     end
    % visualisation_cumuleBatch(nPred,errorLt,nbPerOut,inputsMappingTo, inputsSet, time, errorPerOut, errorArchOut,nbArchOut )
 
@@ -311,5 +311,3 @@ nbArchOutFunc(8,:)=sum(nbArchOut(8:10:end,:),1);
 nbArchOutFunc(9,:)=sum(nbArchOut(9:10:end,:),1);
 nbArchOutFunc(10,:)=sum(nbArchOut(10:10:end,:),1);
 plot(nbArchOutFunc')
-
-end

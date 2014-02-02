@@ -97,8 +97,12 @@ classdef OutputArchive
         end
         
         
-        function output_error = plotArchiveTest(obj,env) %script
+        function output_error = plotArchiveTest(obj,env, pred,BATCH_SIZE) %script
             sMemoryTest =[];
+            mt   = env.randomAction;
+            st   = 2*rand(1,env.dimO)-1;
+            stp1  = executeAction(env, st, mt);
+            st =stp1;
             for t=1:4*BATCH_SIZE
                 %     14:	Execute a motor command m chosen randomly
                 mt   = env.randomAction;
