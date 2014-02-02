@@ -53,7 +53,7 @@ classdef OutputArchive
         function [outArchive,pred,already,iPredAlready] = checkErrorAndAdd(outArchive,pred,iPred,time)
             already=[];
             iPredAlready = [];
-            if numel(pred(iPred).sseRec)>61
+%             if numel(pred(iPred).sseRec)>2000
                 meanSse1 = pred(iPred).meanError;
                 out = pred(iPred).indOutDelay;
                 if numel(out)==1
@@ -76,7 +76,7 @@ classdef OutputArchive
                         disp('DEPRECATEBADPREDICTORSBATCH: error outArchive contains doublons');
                     end
                 end
-            end
+%             end
         end
         
         
@@ -98,12 +98,12 @@ classdef OutputArchive
         
         
         function output_error = plotArchiveTest(obj,env) %script
-            sMemory =[];
+            sMemoryTest =[];
             for t=1:4*BATCH_SIZE
                 %     14:	Execute a motor command m chosen randomly
                 mt   = env.randomAction;
                 smt = [st  mt 1];
-                sMemory = [sMemory; smt];
+                sMemoryTest = [sMemoryTest; smt];
                 
                 %     15:	s(t + 1) ? read from sensorimotor data the new state.
                 stp1  = executeAction(env, st, mt);
@@ -120,8 +120,8 @@ classdef OutputArchive
             for i= 1:nArchived
                 subplot(nPlot, nPlot,i)
                 iPred = archiveM(i,end);
-                inp            = sMemory(end-20-pred(iPred).delay:end-pred(iPred).delay, [pred(iPred).maskInp end]);
-                target        = sMemory(end-20:end, [pred(iPred).maskOut]);
+                inp            = sMemoryTest(end-20-pred(iPred).delay:end-pred(iPred).delay, [pred(iPred).maskInp end]);
+                target        = sMemoryTest(end-20:end, [pred(iPred).maskOut]);
                 
                 output_error(i) = errorInPrediction(pred(iPred),inp, target, 1);
                 if numel(pred(archiveM(i,end)).sizeHid) == 1

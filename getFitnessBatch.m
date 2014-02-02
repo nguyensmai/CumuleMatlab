@@ -4,10 +4,10 @@ function fitness = getFitnessBatch(pred,iPred, iBest, outArchive)
 % nguyensmai@gmail.com
 % nguyensmai.free.fr
 % 
-if isempty(iBest) || numel(pred(iPred).sseRec)>10^3
+if isempty(iBest) || numel(pred(iPred).sseRec)<2000
     fitness = 1;
 else
-    fitness = pred(iBest).progress/pred(iPred).quality;
+    fitness = max([pred(iPred).progress/pred(iPred).quality  pred(iBest).progress/pred(iPred).quality]);
 end
 
 end

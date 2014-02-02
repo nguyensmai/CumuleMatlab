@@ -3,7 +3,7 @@
 % nguyensmai@gmail.com
 % nguyensmai.free.fr
 %
-
+function cumuleBatch(filename)
 %% %%%%%%%%%%%%%%%%%% PARAMETERS %%%%%%%%%%%%%%%%%%
 nPred = 4*50; % 2 layers input mask, 2 layers all 1s , 1 layer input masks, 1 layer all 1s
 dimM = 2;
@@ -36,14 +36,36 @@ globalProbInput=0.4*ones(dimO,dimM+dimO);
 
 % 4: InitialisenPredpredictors(hand-coded).
 pred = initialisePredictors(nPred,inputsSet, env);
+
+% Initialise  the long-term memory
 % 5: m?randommotorcommand
 mt   = env.randomAction;
 % 6:	s(t )	?	initial	state.
 st   = 2*rand(1,dimO)-1;
+stp1  = executeAction(env, st, mt);
+st =stp1;
 
+for t=1:3*BATCH_SIZE
+        %     14:	Execute a motor command m chosen randomly
+        mt   = env.randomAction;
+        smt = [st  mt 1];
+        lMemory = [lMemory; smt];
+        
+        %     15:	s(t + 1) ? read from sensorimotor data the new state.
+        stp1  = executeAction(env, st, mt);
+        
+        %     16:	sm(t+1) ? read sensorimotor data
+        st  = stp1;
+end
+
+% 5: m?randommotorcommand
+mt   = env.randomAction;
+% 6:	s(t )	?	initial	state.
+st   = 2*rand(1,dimO)-1;
+stp1  = executeAction(env, st, mt);
+st =stp1;
 
 %%  %%%%%%%%%%%%%%% RUNNING EVERY TIMESTEP %%%%%%%%%%%%%%%%%%
-
 
 while true
     
@@ -61,11 +83,10 @@ while true
         st  = stp1;
     end
     
-    if size(lMemory,1)<3*BATCH_SIZE
-        lMemory = [sMemory;sMemory;sMemory];
-    else
-        lMemory=[lMemory(3:end,:); sMemory(end-randi(BATCH_SIZE,[2 1]),:)];
-    end
+%     indLM =randi(BATCH_SIZE,[2 1]);
+%     lMemory=[lMemory(3:end,:); sMemory(end-indLM,:)];
+%     sMemory(end-indLM,:)=[];
+    
     
     %% learning
     [pred, outPred, errorL] = TrainPredictorsBatch(pred, sMemory,lMemory, BATCH_SIZE, dimO) ;
@@ -214,9 +235,9 @@ end
     
     time = time + 1;
     if mod(time,100)==0
-       save(['environment50ter_',num2str(floor(time/100))])
+       save([filename,'_',num2str(floor(time/100))])
     end
-    visualisation_cumuleBatch(nPred,errorLt,nbPerOut,inputsMappingTo, inputsSet, time, errorPerOut, errorArchOut,nbArchOut )
+   % visualisation_cumuleBatch(nPred,errorLt,nbPerOut,inputsMappingTo, inputsSet, time, errorPerOut, errorArchOut,nbArchOut )
 
     
     
@@ -290,3 +311,5 @@ nbArchOutFunc(8,:)=sum(nbArchOut(8:10:end,:),1);
 nbArchOutFunc(9,:)=sum(nbArchOut(9:10:end,:),1);
 nbArchOutFunc(10,:)=sum(nbArchOut(10:10:end,:),1);
 plot(nbArchOutFunc')
+
+end

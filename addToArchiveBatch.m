@@ -1,4 +1,4 @@
-function [pred, nPred, mutated, outArchive,globalProbInput] = deprecateBadPredictorsBatch(pred, outArchive, inputsSet, dimO, errorL, progressL, time,globalProbInput)
+function [pred, nPred, mutated, outArchive,globalProbInput] = addToArchiveBatch(pred, outArchive, inputsSet, dimO, errorL, progressL, time,globalProbInput)
 %parameters
 ARCHIVE_THRES = 0.001;
 dimInp = numel(inputsSet);
@@ -15,28 +15,11 @@ for iDepr = 1:1 %nPred/10
     iPred2 = iPreds(2);
     mutated1 = 0;
     
-   
     % archive if good predictors
     [outArchive, pred,already1,iPredAlready1] = checkErrorAndAdd(outArchive,pred,iPred1,time);
     [outArchive, pred,already2,iPredAlready2] = checkErrorAndAdd(outArchive,pred,iPred2,time);
     
-    %compute fitness of the predictors
-    fitness1 = getFitnessBatch( pred, iPred1,iPredAlready1);
-    fitness2 = getFitnessBatch( pred, iPred2, iPredAlready2);
-    
-    if ~isempty(already2)&& (pred(iPred1).idFixed ==-1) %out2 is already in the archive
-        [ pred, globalProbInput, mutated1] = deprecateAlreadyInArchive(pred,iPred2, iPred1, globalProbInput, inputsSet, dimO);
-    elseif ~isempty(already1) && (pred(iPred2).idFixed ==-1)
-        [ pred, globalProbInput, mutated1] = deprecateAlreadyInArchive(pred,iPred1, iPred2, globalProbInput, inputsSet, dimO);
-    else
-        % deprecate based on fitness value
-        if (fitness1>fitness2) && (pred(iPred2).idFixed ==-1) && (rand<(fitness1-fitness2)/fitness1)
-            [pred, globalProbInput, mutated1 ] = deprecatedBasedOnFitness(pred, iPred2, iPred1, globalProbInput, inputsSet, dimO );
-        elseif pred(iPred1).idFixed == -1 && (rand<(fitness2-fitness1)/fitness2);
-            [pred, globalProbInput, mutated1 ] = deprecatedBasedOnFitness(pred, iPred1, iPred2, globalProbInput, inputsSet, dimO );
-        end
-    end
-    mutated = mutated||mutated1;
+  
 end
 
 end

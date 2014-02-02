@@ -26,7 +26,7 @@ for iPred = 1:nPred
         output_error = errorInPrediction(pred(iPred),inp, target);
     
         pred(iPred).progress  = pred(iPred).quality;
-        pred(iPred).quality   = abs(output_error) + 0.98*pred(iPred).quality;
+        pred(iPred).quality   = abs(output_error);
         pred(iPred).meanError = abs(output_error);
     end
     errorL(iPred) = pred(iPred).meanError;
