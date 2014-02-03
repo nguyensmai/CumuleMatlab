@@ -10,6 +10,7 @@ function [pred2, mutated] = copyAndMutate(pred1, inputsSet, dimO,probInput,MUTAT
 sizeInput = numel(inputsSet);
 
 % initialisation
+maskOut = pred1.maskOut;
 bitsOut = zeros(1,dimO);
 bitsOut(pred1.maskOut) = 1;
 bitsInp = zeros(1, numel(inputsSet));
@@ -38,9 +39,11 @@ probInput = probInput/max(probInput);
 %     mutated = 1;
 %     method = ['mutate input '];
 if rand()<MUTATE_MASK_PROBABILITY
-    swap1 = randperm(dimO,2);
-    bitsOut(swap1) = bitsOut(swap1(2:-1:1));
-    mutated = (numel(bitsOut(swap1))==2);
+    %     swap1 = randperm(dimO,2);
+    %     bitsOut(swap1) = bitsOut(swap1(2:-1:1));
+    %     mutated = (numel(bitsOut(swap1))==2);
+    maskOut = randi(dimO,1);
+    mutated = (pred1.maskOut==maskOut);
     method = ['mutate output '];
 end
 
@@ -55,6 +58,19 @@ delay = pred1.delay;
 % end
 
 sizeHid = pred1.sizeHid;
+if rand()<MUTATE_MASK_PROBABILITY
+    r= rand();
+    if r<0.25
+        sizeHid = 5;
+    elseif r<0.5
+        sizeHid = 50;
+    elseif r<0.75
+        sizeHid =[5 5];
+    else
+        sizeHid =50;
+    end
+end
+
 % if rand()<MUTATE_MASK_PROBABILITY
 %     R1 = abs(normrnd(0,pred1.sizeHid));
 % end
@@ -64,7 +80,7 @@ sizeHid = pred1.sizeHid;
 %sizeHid = min([pred1.sizeHid,R1]);
 
 [a maskInp] = find(bitsInp==1);
-[a maskOut] = find(bitsOut==1);
+% [a maskOut] = find(bitsOut==1);
 
 if isempty(maskInp)
     maskInp = randi(sizeInput,1);
