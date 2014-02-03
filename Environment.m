@@ -34,11 +34,11 @@ classdef Environment < handle
                 error(['ENVIRONMENT: error in input action', num2str(size(action,2)), ' instead of 2']);
             end
             
-            outputState(1) =  cos(action(1)*5*pi);
+            outputState(1) =  cos(action(1)*2*pi);
             outputState(2) =  (state(1)+state(2))/2;
             outputState(3) =  cos(state(1)*pi);
             outputState(4) =  cos(action(1)*2*pi)* cos(action(2)*2*pi);
-            outputState(5) =  (mean(exp(10*(state-1))) +mean(exp(10*(-state-1))))/2;
+            outputState(5) =  2*(mean((1*(state-1))) -mean((1*(-state-1))));
             outputState(6) =  ((action(1)+action(2))/2)^2;
             outputState(7) =  0.5;
             outputState(8) =  exp(5*(state(4)-1));
@@ -48,27 +48,27 @@ classdef Environment < handle
             outputState(12) =  (state(11)+state(12))/2;
             outputState(13) =  cos(state(11)*pi);
             outputState(14) =  cos(action(1)*2*pi)* cos(action(2)*2*pi);
-            outputState(15) =  (mean(exp(15*(state-1))) +mean(exp(15*(-state-1))))/2;;
+            outputState(15) =  1.5*(mean((1*(state-1.5))) - 0.8* mean((1*(-state-1.5))));
             outputState(16) =  ((action(1)+action(2))/2)^2;
             outputState(17) =  0.5;
             outputState(18) =  exp(7*(state(14)-1));
             outputState(19) =  2*exp(-(action(1)-0.5).^2/(2*10^-2))-1;
             outputState(20) =  exp(-(action(1)-0.7).^2/(2*10^-3))- exp(-(action(2)-0.1).^2/(2*10^-4)); 
-            outputState(21) =  cos(action(1)*5*pi);
+            outputState(21) =  cos(action(1)*3*pi);
             outputState(22) =  (state(21)+state(22))/2;
             outputState(23) =  cos(state(21)*pi);
             outputState(24) =  cos(action(1)*2*pi)* cos(action(2)*2*pi);
-            outputState(25) =  (mean(exp(5*(state-1))) +mean(exp(5*(-state-1))))/2;
+            outputState(25) =  1.5*(mean((1*(state-1.2))) -mean((1*(-state-1.2))));
             outputState(26) =  ((action(1)+action(2))/2)^2;
             outputState(27) =  1;
             outputState(28) =  exp(2*(state(24)-1));
             outputState(29) =  2*exp(-(action(1)-0.5).^2/(2*10^-2))-1;
             outputState(30) =  exp(-(action(1)-0.7).^2/(2*10^-3))- exp(-(action(2)-0.1).^2/(2*10^-4));
-            outputState(31) =  cos(action(1)*5*pi);
+            outputState(31) =  cos(action(1)*4*pi);
             outputState(32) =  (state(31)+state(32))/2;
             outputState(33) =  cos(state(1)*pi);
             outputState(34) =  cos(action(1)*2*pi)* cos(action(2)*2*pi);
-            outputState(35) =  (mean(exp(20*(state-1))) +mean(exp(20*(-state-1))))/2;
+            outputState(35) =  3*(mean(abs(1*(state-1))) -mean(abs(1*(-state-1))));
             outputState(36) =  ((action(1)+action(2))/2)^2;
             outputState(37) =  0.1;
             outputState(38) =  exp(10*(state(34)-1));
@@ -78,7 +78,7 @@ classdef Environment < handle
             outputState(42) =  (state(1)+state(2))/2;
             outputState(43) =  cos(state(1)*pi);
             outputState(44) =  cos(action(1)*2*pi)* cos(action(2)*2*pi);
-            outputState(45) =  (mean(exp(2*(state-1))) +mean(exp(2*(-state-1))))/2;;
+            outputState(45) =  4*(mean(abs(0.5*(state-1))) -mean(abs(1*(-state-1))));
             outputState(46) =  ((action(1)+action(2))/2)^2;
             outputState(47) =  0.5;
             outputState(48) =  exp(10*(state(44)-1));

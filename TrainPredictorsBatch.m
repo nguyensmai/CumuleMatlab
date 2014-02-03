@@ -25,11 +25,13 @@ for iPred = 1:nPred
         target       = lMemory(end-2*batch_size+1:end, [pred(iPred).maskOut]);
         output_error = errorInPrediction(pred(iPred),inp, target);
     
-        pred(iPred).progress  = pred(iPred).quality;
-        pred(iPred).quality   = abs(output_error);
-        pred(iPred).meanError = abs(output_error);
+        pred(iPred).meanError = [pred(iPred).meanError; abs(output_error)];
+        if numel(pred(iPred).meanError)>10
+        pred(iPred).progress  = mean(pred(iPred).meanError(end-10:end-5));
+        pred(iPred).quality   = mean(pred(iPred).meanError(end-5:end));
+        end
     end
-    errorL(iPred) = pred(iPred).meanError;
+    errorL(iPred) = pred(iPred).meanError(end);
 end
 
 

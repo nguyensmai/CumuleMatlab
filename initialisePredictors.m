@@ -11,42 +11,49 @@ function pred = initialisePredictors(nPred, inputsSet, env)
 % outputSize    = numel(outputMask);
 % 
 
- pred(1) = FFN([1 9], [1], 5, inputsSet,1);  % good for env4 [s1 m1] -> s1
+pred(1) = FFN([1 9], [1], 5, inputsSet,1);  % good for env4 [s1 m1] -> s1
 
 %randomly generated
 probInput = 0.4*ones(size(inputsSet));
 
-% 1 layer small
 for iPred=1:env.dimO
     out =  mod(iPred-1,env.dimO)+1;
-    %delay = floor((iPred-1)/env.dimO)+1;
-    pred(iPred) = FFN(inputsSet, out, 5, inputsSet,1); % testing the influence of the hidden layer size
-    %[pred(iPred), inPredi, outPredi] = generatePredictor(inputsSet, pred, env.dimO,out, delay, probInput);
+    r = rand();
+    if r<0.25
+        % 1 layer small
+        pred(iPred) = FFN(inputsSet, out, 5, inputsSet,1); % testing the influence of the hidden layer size
+    elseif r<0.5
+        % 1 layer big
+        pred(iPred) = FFN(inputsSet, out, 50, inputsSet,1); % testing the influence of the hidden layer size
+    elseif r<0.75
+        % 2 layers small
+        pred(iPred) = FFN(inputsSet, out, [5 5], inputsSet,1); % testing the influence of the hidden layer size
+    else
+        % 2 layers big
+        pred(iPred) = FFN(inputsSet, out, [50 50], inputsSet,1); % testing the influence of the hidden layer size
+    end
 end
 
-% 1 layer big
 for iPred=env.dimO+1:2*env.dimO
     out =  mod(iPred-1,env.dimO)+1;
-    %delay = floor((iPred-1)/env.dimO)+1;
-    pred(iPred) = FFN(inputsSet, out, 50, inputsSet,1); % testing the influence of the hidden layer size
-    %[pred(iPred), inPredi, outPredi] = generatePredictor(inputsSet, pred, env.dimO,out, delay, probInput);
+    % 1 layer big
+    r = rand();
+    if r<0.25
+        % 1 layer small
+        pred(iPred) = FFN(inputsSet, out, 5, inputsSet,1); % testing the influence of the hidden layer size
+    elseif r<0.5
+        % 1 layer big
+        pred(iPred) = FFN(inputsSet, out, 50, inputsSet,1); % testing the influence of the hidden layer size
+    elseif r<0.75
+        % 2 layers small
+        pred(iPred) = FFN(inputsSet, out, [5 5], inputsSet,1); % testing the influence of the hidden layer size
+    else
+        % 2 layers big
+        pred(iPred) = FFN(inputsSet, out, [50 50], inputsSet,1); % testing the influence of the hidden layer size
+    end
 end
 
-% 2 layers small
-for iPred=2*env.dimO+1:3*env.dimO
-    out =  mod(iPred-1,env.dimO)+1;
-    %delay = floor((iPred-1)/env.dimO)+1;
-    pred(iPred) = FFN(inputsSet, out, [5 5], inputsSet,1); % testing the influence of the hidden layer size
-    %[pred(iPred), inPredi, outPredi] = generatePredictor(inputsSet, pred, env.dimO,out, delay, probInput);
-end
 
-% 2 layers big
-for iPred=3*env.dimO+1:4*env.dimO
-    out =  mod(iPred-1,env.dimO)+1;
-    %delay = floor((iPred-1)/env.dimO)+1;
-    pred(iPred) = FFN(inputsSet, out, [50 50], inputsSet,1); % testing the influence of the hidden layer size
-    %[pred(iPred), inPredi, outPredi] = generatePredictor(inputsSet, pred, env.dimO,out, delay, probInput);
-end
 
 %{
 % 2 layers input mask

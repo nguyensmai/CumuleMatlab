@@ -54,7 +54,7 @@ classdef OutputArchive
             already=[];
             iPredAlready = [];
 %             if numel(pred(iPred).sseRec)>2000
-                meanSse1 = pred(iPred).meanError;
+                meanSse1 = pred(iPred).meanError(end);
                 out = pred(iPred).indOutDelay;
                 if numel(out)==1
                     [already,~, ~,~, iPredAlready] = findOutput(outArchive, out);
@@ -63,7 +63,7 @@ classdef OutputArchive
                         %the best
                         %                          iPredAlready
                         %                          pred(iPredAlready)
-                        meanSseAlready = pred(iPredAlready).meanError;
+                        meanSseAlready = pred(iPredAlready).meanError(end);
                         if meanSseAlready>meanSse1
                             [outArchive,pred] = changeElement(outArchive, already,iPredAlready, pred, iPred, time);
                         end

@@ -5,11 +5,11 @@
 %
 
 %% %%%%%%%%%%%%%%%%%% PARAMETERS %%%%%%%%%%%%%%%%%%
-nPred = 4*50; % 2 layers input mask, 2 layers all 1s , 1 layer input masks, 1 layer all 1s
+nPred = 2*50; % 2 layers input mask, 2 layers all 1s , 1 layer input masks, 1 layer all 1s
 dimM = 2;
 dimO = 50;
 MEMORY_SIZE  = 500;
-BATCH_SIZE   = 50;
+BATCH_SIZE   = 100;
 
 %%  %%%%%%%%%%%%%%% INITIALISATION %%%%%%%%%%%%%%%%%%
 rng('shuffle');
@@ -235,9 +235,9 @@ end
     
     time = time + 1;
     if mod(time,100)==0
-       save(['trainBatch',num2str(floor(time/100))])
+       save(['trainBatch1_',num2str(floor(time/1000))])
     end
-  % visualisation_cumuleBatch(nPred,errorLt,nbPerOut,inputsMappingTo, inputsSet, time, errorPerOut, errorArchOut,nbArchOut )
+   visualisation_cumuleBatch(nPred,errorLt,nbPerOut,inputsMappingTo, inputsSet, time, errorPerOut, errorArchOut,nbArchOut )
 
     
     
